@@ -14,11 +14,16 @@ module CardGame
   #
   #     Person.new(name: "Don", age: 42, nick_names: %w(Donny))
   module ValueObject
+    # @private
     def self.included(klass)
       klass.extend(ClassMethods)
       klass.attributes # Force instantiation
     end
 
+    # @param data Hash hash of attribute to value mappings.
+    # @raise ArgumentError if any provided attributes were not defined by
+    #                      +.attribute+ on the class.
+    # @raise ArgumentError if any values do not match defined types.
     def initialize(data)
       data.each do |key, value|
         type = self.class.attributes[key]
@@ -34,19 +39,24 @@ module CardGame
       end
     end
 
+    # Delegates to an array composed of all attribute values.
     def ==(other)
       equality_key == other.equality_key
     end
 
+    # Delegates to an array composed of all attribute values.
     def eql?(other)
       equality_key.eql?(other.equality_key)
     end
 
+    # Delegates to an array composed of all attribute values.
     def hash
       equality_key.hash
     end
 
-    def inspect
+    # Compact string representation of the object, showing all attribute
+    # values.
+    def to_s
       keyvalues = self.class.attributes.map {|key, _|
         "#{key}=#{send(key).inspect}"
       }.join(" ")
@@ -54,9 +64,7 @@ module CardGame
       "<#{self.class.name} #{keyvalues}>"
     end
 
-    def to_s
-      inspect
-    end
+    alias_method :to_s, :inspect
 
     # @private
     def equality_key
