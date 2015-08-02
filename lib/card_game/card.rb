@@ -77,7 +77,7 @@ module CardGame
       symbol + " "
     end
 
-    alias_method :to_s, :inspect
+    alias_method :inspect, :to_s
   end
 
   # @private
@@ -103,7 +103,7 @@ module CardGame
   def Suit.none; NoSuit end
 
   # Represents a playing card of rank and suit. This object is deliberately
-  # _not_ +Comparable+. Different games defined their own orderings.
+  # _not_ comparable. Different games defined their own orderings.
   #
   # @see CardGame::Ranking
   class Card
@@ -121,7 +121,7 @@ module CardGame
       rank.to_s + suit.to_s
     end
 
-    alias_method :to_s, :inspect
+    alias_method :inspect, :to_s
 
     # Construct a card from a shorthand string syntax. Suits are represented by
     # the first letter of their name (+H+ for hearts), as are ranks although
