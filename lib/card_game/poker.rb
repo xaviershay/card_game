@@ -74,41 +74,50 @@ module CardGame
         attribute :remainder
       end
 
+      def <=>(other)
+        result = super
+
+        # This assertion is needed since we re-use this same class for pair,
+        # three, and four of a kind. They should be compared by RankedPattern
+        # before falling through to here.
+        if n != other.n
+          raise "Cannot compare kinds of different order (#{n} != #{other.n})"
+        end
+
+        result
+      end
+
       def key
         [n, Ranking::AceHigh[rank], HighCard.new(cards: remainder)]
       end
 
-      # TODO: Make this thread-safe and not shit
       def self.[](n)
-        @cache ||= {}
-        @cache[n] ||= begin
-          c = Class.new(self)
-          (class << c; self end).class_eval do
-            define_method(:n) { n }
-          end
-          c
+        Matcher.new(n: n)
+      end
+
+      class Matcher
+        include Virtus.value_object
+
+        values do
+          attribute :n
         end
-      end
 
-      def self.name
-        "OfAKind[#{n}]"
-      end
+        def apply(hand)
+          matches = hand
+            .group_by(&:rank)
+            .to_a
+            .select {|_, cards| cards.size == n }
+            .sort_by {|rank, cards| [cards.size, Ranking::AceHigh[rank]] }
 
-      def self.apply(hand)
-        matches = hand
-          .group_by(&:rank)
-          .to_a
-          .select {|_, cards| cards.size == n }
-          .sort_by {|rank, cards| [cards.size, Ranking::AceHigh[rank]] }
+          top = matches.pop
 
-        top = matches.pop
-
-        if top && top[1].size >= 2
-          new(
-            rank:      top[0],
-            n:         top[1].size,
-            remainder: hand - top[1],
-          )
+          if top && top[1].size >= 2
+            OfAKind.new(
+              rank:      top[0],
+              n:         top[1].size,
+              remainder: hand - top[1],
+            )
+          end
         end
       end
     end
@@ -172,19 +181,23 @@ module CardGame
       end
     end
 
-    class FullHouse < OfAKind[3]
+    class FullHouse < Pattern
+      values do
+        attribute :pattern
+      end
+
       def self.apply(hand)
-        three = super(hand)
+        three = OfAKind[3].apply(hand)
         return unless three
 
         two = OfAKind[2].apply(three.remainder)
         return unless two
 
-        three
+        new(pattern: three)
       end
 
-      def self.name
-        "FullHouse"
+      def key
+        pattern
       end
     end
 
