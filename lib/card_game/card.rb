@@ -88,6 +88,19 @@ module CardGame
   Diamonds = Suit.new(symbol: "♢")
   # @private
   Clubs    = Suit.new(symbol: "♧")
+  # @private
+  NoSuit   = Suit.new(symbol: "")
+
+  # @return Suit
+  def Suit.spades; Spades end
+  # @return Suit
+  def Suit.hearts; Hearts end
+  # @return Suit
+  def Suit.diamonds; Diamonds end
+  # @return Suit
+  def Suit.clubs; Clubs end
+  # @return Suit
+  def Suit.none; NoSuit end
 
   # Represents a playing card of rank and suit. This object is deliberately
   # _not_ +Comparable+. Different games defined their own orderings.
@@ -137,6 +150,10 @@ module CardGame
       }.fetch(value[0]) { NumberedRank.new(n: value[0..-2].to_i) }
 
       new(suit: suit, rank: rank)
+    end
+
+    def self.unsuited(rank)
+      new(rank: rank, suit: Suit.none)
     end
   end
 

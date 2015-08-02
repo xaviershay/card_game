@@ -70,9 +70,7 @@ module CardGame
         end
 
         def key
-          cards.map do |card|
-            Ranking.ace_high[card.rank]
-          end.sort.reverse
+          cards.map(&Ranking.ace_high).sort.reverse
         end
 
         def self.apply(hand)
@@ -102,7 +100,11 @@ module CardGame
         end
 
         def key
-          [n, Ranking.ace_high[rank], HighCard.new(cards: remainder)]
+          [
+            n,
+            Ranking.ace_high[Card.unsuited(rank)],
+            HighCard.new(cards: remainder)
+          ]
         end
 
         def self.[](n)
@@ -122,7 +124,9 @@ module CardGame
               .group_by(&:rank)
               .to_a
               .select {|_, cards| cards.size == n }
-              .sort_by {|rank, cards| [cards.size, Ranking.ace_high[rank]] }
+              .sort_by {|rank, cards|
+                [cards.size, Ranking.ace_high[Card.unsuited(rank)]]
+              }
               .pop
 
             if top && top[1].size >= 2
@@ -160,8 +164,8 @@ module CardGame
 
         def key
           [
-            Ranking.ace_high[first],
-            Ranking.ace_high[second],
+            Ranking.ace_high[Card.unsuited(first)],
+            Ranking.ace_high[Card.unsuited(second)],
             HighCard.new(cards: remainder),
           ]
         end
@@ -175,21 +179,21 @@ module CardGame
 
         def self.apply(hand)
           result = [Ranking.ace_high, Ranking.ace_low].lazy.map {|ranking|
-            ranks = hand.map(&:rank).map {|rank| ranking[rank] }.sort
+            ranks = hand.map(&ranking).sort
             min = ranks.first
 
             expected = (min..ranking.max).take(5)
 
             if expected.size == 5 && expected.zip(ranks).all? {|x, y| x == y }
-              hand.map(&:rank).sort_by {|rank| ranking[rank] }.last
+              hand.sort_by(&ranking).last
             end
           }.detect {|x| x }
 
-          new(high: result) if result
+          new(high: result.rank) if result
         end
 
         def key
-          Ranking.ace_high[high]
+          Ranking.ace_high[Card.unsuited(high)]
         end
       end
 

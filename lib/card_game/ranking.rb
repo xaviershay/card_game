@@ -11,23 +11,23 @@ module CardGame
     # @private
     Ace     = [Ace]
 
-    # A function object for a ranking scheme, allowing ranks to be sorted
+    # A function object for a ranking scheme, allowing cards to be sorted
     # according to different criteria (ace-high, ace-low, etc).
     class Interface
-      # Returns a consistent token for a +Rank+ that will sort with the
+      # Returns a consistent token for a +Card+ that will sort with the
       # scheme's properties. Tokens are guaranteed sequential over the full set
-      # of ranks, but may not be unique, i.e. two ranks may produce the same
+      # of cards, but may not be unique, i.e. two cards may produce the same
       # token. The token is not guaranteed stable across versions and should
       # not be persisted.
       #
       # +succ+ is provided on tokens for convenience of identifying straights
       # (+A-2-3-4-5+). It returns the next sequential token in a ranking, but
-      # does not map back to a specific +Rank+.
+      # does not map back to a specific +Card+ since multiple cards may have
+      # that same next ranking.
       #
       # @return [Comparable, #succ] An opaque sortable token.
-      # @param rank CardGame::Rank
-      def call(rank)
-        raise NotImplementedError
+      # @param card CardGame::Card
+      def call(card)
       end
 
       # The highest ranking token that could be returned by +call+. Useful when
@@ -48,8 +48,8 @@ module CardGame
         attribute :ranking, Array[Rank]
       end
 
-      def call(rank)
-        ranking.index(rank) || raise("Unknown rank: #{rank}")
+      def call(card)
+        ranking.index(card.rank) || raise("Unknown rank: #{rank}")
       end
 
       def max
@@ -57,6 +57,10 @@ module CardGame
       end
 
       alias_method :[], :call
+
+      def to_proc
+        -> x { call(x) }
+      end
     end
 
     # @private
