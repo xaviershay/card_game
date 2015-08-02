@@ -37,6 +37,15 @@ module CardGame
       def max
       end
 
+      # Wraps +call+ in a proc. Suitable for use in +map+ and friends.
+      #
+      # @return [Proc]
+      # @example
+      #   cards.sort_by(&Ranking.ace_high)
+      def to_proc
+        -> x { call(x) }
+      end
+
       alias_method :[], :call
     end
 
@@ -49,7 +58,8 @@ module CardGame
       end
 
       def call(card)
-        ranking.index(card.rank) || raise("Unknown rank: #{rank}")
+        ranking.index(card.rank) || raise(ArgumentError,
+          "Cannot order #{card.rank}. Known ranks: #{ranking}")
       end
 
       def max
@@ -57,9 +67,73 @@ module CardGame
       end
 
       alias_method :[], :call
+    end
 
-      def to_proc
-        -> x { call(x) }
+    # @private
+    # TODO: Wrap result to provide succ.
+    class Composite < Interface
+      include ValueObject
+
+      values do
+        attribute :children, Array[Interface]
+      end
+
+      def call(card)
+        children.map do |x|
+          begin
+            x.call(card)
+          rescue ArgumentError => e
+            # Assumed that earlier children uniquely sort this card. Instead
+            # provide an unrankable token that will raise the exception only if
+            # interacted with.
+            Unrankable.new(e)
+          end
+        end
+      end
+      alias_method :[], :call
+
+      def max
+        children.map(&:max)
+      end
+
+      # @private
+      class Unrankable < BasicObject
+        def initialize(ex)
+          @ex = ex
+        end
+
+        def to_s
+          "Unrankable"
+        end
+
+        alias_method :inspect, :to_s
+
+        def method_missing(*_)
+          ::Kernel.raise @ex
+        end
+      end
+    end
+
+    # @private
+    # TODO: Wrap response to provide succ
+    class Binary < Interface
+      include ValueObject
+
+      values do
+        attribute :condition, Proc
+      end
+
+      def call(card)
+        if condition.call(card)
+          1
+        else
+          0
+        end
+      end
+      alias_method :[], :call
+
+      def max
+        1
       end
     end
 
@@ -71,7 +145,7 @@ module CardGame
 
     # Order aces high, ignoring suit.
     #
-    # @return Interface
+    # @return [Interface]
     # @example
     #     ace_high[Card.from_string("AH")] > ace_high[Card.from_string("KD")]
     #     # => true
@@ -81,12 +155,54 @@ module CardGame
 
     # Order aces low, ignoring suit.
     #
-    # @return Interface
+    # @return [Interface]
     # @example
     #     ace_low[Card.from_string("AH")] < ace_low[Card.from_string("2D")]
     #     # => true
     def self.ace_low
       AceLow
+    end
+
+    # Create a composite ranking from child rankings. Left-most supplied
+    # rankings are used first, with subsequent used to break ties.
+    #
+    # @example
+    #     composite = Ranking.composite(
+    #       Ranking.suit(Suit.hearts),
+    #       Ranking.ace_high,
+    #     )
+    #     composite[Card.from_string("AS")] > ace_low[Card.from_string("2H")]
+    #     # => false
+    #     composite[Card.from_string("AS")] > ace_low[Card.from_string("KS")]
+    #     # => true
+    # @param children [Array<Interface>]
+    # @raise [ArgumentError] when no children are provided (+children+ is
+    #                        empty).
+    # @return [Interface]
+    def self.composite(*children)
+      if children.empty?
+        raise ArgumentError, "Composite ranking must have at least one child."
+      end
+
+      Composite.new(children: children)
+    end
+
+    # Any card matching the suit is ranked higher than any card of non-matching
+    # suits.
+    #
+    # @param suit [Suit]
+    # @return [Interface]
+    def self.suit(suit)
+      Binary.new(condition: -> card { card.suit == suit })
+    end
+
+    # The given card is ranked higher than every other card. Useful for dealing
+    # with jokers and other special cards.
+    #
+    # @param card [Card]
+    # @return [Interface]
+    def self.match(card)
+      Binary.new(condition: -> x { x == card })
     end
   end
 end

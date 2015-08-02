@@ -10,8 +10,8 @@ module CardGame
     # Standard poker rules are used. Suits are ignored.
     #
     # @return [Comparable]
-    # @param hand [CardGame::Card] hand to classify. Usual length is five, though
-    #                              not required.
+    # @param hand [CardGame::Card] hand to classify. Usual length is five,
+    #                              though not required.
     def self.classify(hand)
       Patterns::ALL
         .lazy

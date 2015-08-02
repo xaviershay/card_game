@@ -47,13 +47,14 @@ module CardGame
   class NamedRank < Rank
     values do
       attribute :name, String
+      attribute :short
     end
 
     def to_s
-      name[0]
+      short || name[0]
     end
 
-    alias_method :to_a, :inspect
+    alias_method :inspect, :to_s
   end
 
   # @private
@@ -64,6 +65,8 @@ module CardGame
   King  = NamedRank.new(name: 'King')
   # @private
   Ace   = NamedRank.new(name: 'Ace')
+  # @private
+  Joker = NamedRank.new(name: 'Joker', short: 'Jk')
 
   # Suit of a card, such as hearts or diamonds.  This is a very dumb object,
   # just providing basic equality and inspection.
@@ -134,6 +137,8 @@ module CardGame
     #   Card.from_string("KS")  # King of spades
     #   Card.from_string("2C")  # Two of clubs
     def self.from_string(value)
+      return new(suit: Suit.none, rank: Joker) if value == "Jk"
+
       short_suit = value[-1]
       suit = {
         "H" => Hearts,
@@ -160,5 +165,4 @@ module CardGame
       new(rank: rank, suit: Suit.none)
     end
   end
-
 end
