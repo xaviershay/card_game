@@ -152,6 +152,10 @@ module CardGame
       new(suit: suit, rank: rank)
     end
 
+    # Construct a card with no suit.
+    #
+    # @param rank [Rank]
+    # @return Card
     def self.unsuited(rank)
       new(rank: rank, suit: Suit.none)
     end
