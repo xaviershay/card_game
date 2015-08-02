@@ -1,5 +1,4 @@
-require 'virtus'
-
+require 'card_game/value_object'
 require 'card_game/card'
 
 module CardGame
@@ -9,7 +8,7 @@ module CardGame
     Ace     = [Ace]
 
     class FromArray
-      include Virtus.value_object
+      include ValueObject
 
       values do
         attribute :ranking, Array[Rank]

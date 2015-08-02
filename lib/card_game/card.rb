@@ -1,10 +1,10 @@
 # encoding: utf-8
 
-require 'virtus'
+require 'card_game/value_object'
 
 module CardGame
   class Rank
-    include Virtus.value_object
+    include ValueObject
   end
 
   class Hand
@@ -47,7 +47,7 @@ module CardGame
   Ace   = NamedRank.new(name: 'Ace')
 
   class Suit
-    include Virtus.value_object
+    include ValueObject
 
     attribute :symbol, String
 
@@ -66,7 +66,7 @@ module CardGame
   Clubs    = Suit.new(symbol: "♧")
 
   class Card
-    include Virtus.value_object
+    include ValueObject
 
     values do
       attribute :rank, Rank

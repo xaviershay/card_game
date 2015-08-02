@@ -1,11 +1,10 @@
-require 'virtus'
-
+require 'card_game/value_object'
 require 'card_game/ranking'
 
 module CardGame
   class Poker
     class Pattern
-      include Virtus.value_object
+      include ValueObject
       include Comparable
 
       def <=>(other)
@@ -17,7 +16,7 @@ module CardGame
     end
 
     class RankedPattern
-      include Virtus.value_object
+      include ValueObject
       include Comparable
 
       values do
@@ -35,7 +34,7 @@ module CardGame
     end
 
     class RankedPatternMatcher
-      include Virtus.value_object
+      include ValueObject
       include Comparable
 
       values do
@@ -96,7 +95,7 @@ module CardGame
       end
 
       class Matcher
-        include Virtus.value_object
+        include ValueObject
 
         values do
           attribute :n
