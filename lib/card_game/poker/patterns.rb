@@ -25,6 +25,27 @@ module CardGame
       end
 
       # @private
+      class RankedPattern < Patterns::Pattern
+        values do
+          attribute :pattern
+          attribute :rank
+        end
+
+        def <=>(other)
+          super
+        end
+
+        def initialize(*_)
+          super
+        end
+
+        # @private
+        def key
+          [rank, pattern]
+        end
+      end
+
+      # @private
       class RankedPatternMatcher
         include ValueObject
         include Comparable
@@ -208,33 +229,7 @@ module CardGame
           Flush.apply(hand) && super
         end
       end
-    end
 
-    # A +Comparable+ object representing the strength of a poker hand.
-    # Stronger hands will sort higher than weaker ones.
-    class RankedPattern < Patterns::Pattern
-      # Moved outside of Patterns namespace so that the latter can be private.
-      values do
-        attribute :pattern
-        attribute :rank
-      end
-
-      # Implementation of +Comparable+ interface.
-      #
-      # @param other [RankedPattern]
-      # @raise [ArgumentError] if comparing two different classes.
-      # @return Integer
-      def <=>(other)
-        super
-      end
-
-      # @private
-      def key
-        [rank, pattern]
-      end
-    end
-
-    module Patterns
       # @private
       ALL = [
         StraightFlush,

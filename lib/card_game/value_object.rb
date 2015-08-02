@@ -13,6 +13,8 @@ module CardGame
   #     end
   #
   #     Person.new(name: "Don", age: 42, nick_names: %w(Donny))
+  #
+  # @api private
   module ValueObject
     # @private
     def self.included(klass)
