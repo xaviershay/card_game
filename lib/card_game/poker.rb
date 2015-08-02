@@ -206,20 +206,24 @@ module CardGame
       end
     end
 
+    # @private
+    PATTERNS = [
+      StraightFlush,
+      OfAKind[4],
+      FullHouse,
+      Flush,
+      Straight,
+      OfAKind[3],
+      TwoPair,
+      OfAKind[2],
+      HighCard,
+    ].reverse.map.with_index {|x, i|
+      RankedPatternMatcher.new(pattern_type: x, rank: i)
+    }.reverse
+
     def self.classify(hand)
-      [
-        StraightFlush,
-        OfAKind[4],
-        FullHouse,
-        Flush,
-        Straight,
-        OfAKind[3],
-        TwoPair,
-        OfAKind[2],
-        HighCard,
-      ].reverse.map.with_index {|x, i|
-        RankedPatternMatcher.new(pattern_type: x, rank: i)
-      }.reverse.lazy
+      PATTERNS
+        .lazy
         .map {|matcher| matcher.apply(hand) }
         .detect {|x| x }
     end
