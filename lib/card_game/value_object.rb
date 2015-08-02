@@ -100,9 +100,7 @@ module CardGame
       def attribute(name, type = Object)
         attributes[name] = type
 
-        define_method(name) do
-          instance_variable_get("@#{name}")
-        end
+        attr_reader name
       end
 
       # @private
