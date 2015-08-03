@@ -14,5 +14,14 @@ module CardGame
       attribute :cards, Array[Card]
       attribute :trump, Suit
     end
+
+    # Create a new trick.
+    #
+    # @param cards [Array<Card>]
+    # @param trump [Suit]
+    # @return [Trick]
+    def self.build(cards, trump = Suit.none)
+      new(cards: cards, trump: trump)
+    end
   end
 end

@@ -12,16 +12,25 @@ module CardGame
     # Create an array of cards uing a shorthand string syntax.
     #
     # @see CardGame::Card.from_string
-    # @return [CardGame::Card]
+    # @return [Card]
     # @example
     #     CardGame::Hand.build("10H JC QD KS AD")
     def self.build(string)
       string.split(/\s+/).map(&Card.method(:from_string))
     end
+
+    private
+
+    def initialize(*_)
+      super
+    end
   end
 
   # Represents a playing card of rank and suit. This object is deliberately
   # _not_ comparable. Different games defined their own orderings.
+  #
+  # +Color+ objects cannot be instantiated directly. Instead, use one of the
+  # provided class-level builder methods such as +build+ or +from_string+.
   #
   # @attr_reader rank [Rank] Rank of the card.
   # @attr_reader suit [Suit] Suit of the card.
@@ -36,7 +45,7 @@ module CardGame
 
     # String representation of card. May include unicode suit symbol.
     #
-    # @return String
+    # @return [String]
     def to_s
       rank.to_s + suit.to_s
     end
@@ -47,7 +56,7 @@ module CardGame
     # the first letter of their name (+H+ for hearts), as are ranks although
     # numbers are numeric.
     #
-    # @return CardGame::Card
+    # @return [Card]
     # @example
     #   Card.from_string("AD")  # Ace of diamonds
     #   Card.from_string("10H") # Ten of hearts
@@ -74,12 +83,27 @@ module CardGame
       new(suit: suit, rank: rank)
     end
 
+    # Create a new card instance.
+    #
+    # @param rank [Rank]
+    # @param suit [Suit]
+    # @return [Card]
+    def self.build(rank, suit)
+      new(rank: rank, suit: suit)
+    end
+
     # Construct a card with no suit.
     #
     # @param rank [Rank]
-    # @return Card
+    # @return [Card]
     def self.unsuited(rank)
       new(rank: rank, suit: Suit.none)
+    end
+
+    private
+
+    def initialize(*_)
+      super
     end
   end
 end

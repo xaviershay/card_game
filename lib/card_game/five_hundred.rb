@@ -13,7 +13,8 @@ module CardGame
       Suit.spades   => Suit.clubs,
     }
 
-    # Returns the winning card of a given trick.
+    # Returns the winning card of a given trick, accounting for trumps, bowers,
+    # and the Joker.
     #
     # @param trick [Trick]
     # @return [Card]
@@ -43,9 +44,10 @@ module CardGame
       Color.black => Card.unsuited(Rank.numbered(5)),
     }
 
-    def self.deck(players: 4)
-      raise ArgumentError, "Only 4 players are supported" unless players == 4
-
+    # Creates a deck suitable for Five Hundred with four players.
+    #
+    # @return [Array<Card>]
+    def self.deck
       ranking = Ranking.ace_high
 
       (Rank.all - [Rank.joker]).product(Suit.all - [Suit.none])
