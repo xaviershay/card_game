@@ -23,9 +23,9 @@ module CardGame
       raise(ArgumentError, "Trick must contain at least one card") unless led
 
       opposite = OPPOSITES.fetch(trick.trump) { Suit.none }
-      left_bower  = Card.new(rank: Jack, suit: opposite)
-      right_bower = Card.new(rank: Jack, suit: trick.trump)
-      joker       = Card.new(rank: Joker, suit: Suit.none)
+      left_bower  = Card.new(rank: Rank.jack, suit: opposite)
+      right_bower = Card.new(rank: Rank.jack, suit: trick.trump)
+      joker       = Card.new(rank: Rank.joker, suit: Suit.none)
 
       trick.cards.sort_by(&Ranking.composite(
         Ranking.match(joker),
@@ -37,20 +37,22 @@ module CardGame
       )).last
     end
 
+    # @private
+    LOWEST_RANKS = {
+      Color.red   => Card.unsuited(Rank.numbered(4)),
+      Color.black => Card.unsuited(Rank.numbered(5)),
+    }
+
     def self.deck(players: 4)
       raise ArgumentError, "Only 4 players are supported" unless players == 4
 
       ranking = Ranking.ace_high
-      lowest = {
-        Color.red   => Card.unsuited(NumberedRank.new(n: 4)),
-        Color.black => Card.unsuited(NumberedRank.new(n: 5)),
-      }
 
-      (Rank.all - [Joker]).product(Suit.all - [Suit.none])
+      (Rank.all - [Rank.joker]).product(Suit.all - [Suit.none])
         .map {|rank, suit| Card.new(rank: rank, suit: suit) }
         .select {|card|
-          ranking[card] >= ranking[lowest.fetch(card.suit.color)]
-        } + [Card.new(rank: Joker, suit: Suit.none)]
+          ranking[card] >= ranking[LOWEST_RANKS.fetch(card.suit.color)]
+        } + [Card.new(rank: Rank.joker, suit: Suit.none)]
     end
   end
 end

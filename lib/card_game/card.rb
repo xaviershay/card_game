@@ -1,6 +1,7 @@
 # encoding: utf-8
 
 require 'card_game/value_object'
+require 'card_game/rank'
 
 module CardGame
   class Color
@@ -17,29 +18,6 @@ module CardGame
     def self.none; None end
   end
 
-  # The rank of a card, either the number or face name (Jack, Queen, etc...).
-  # This is a very dumb object, just providing basic equality and inspection.
-  class Rank
-    include ValueObject
-
-    # Short string representation of the rank.
-    def to_s
-      super
-    end
-
-    def self.all
-      AllRanks
-    end
-
-    def self.numbered(n)
-      NumberedRank.new(n: n)
-    end
-
-    def self.joker
-      Joker
-    end
-  end
-
   # Represents a hand of multiple cards. Current this is actually represented
   # as an array.
   class Hand
@@ -53,53 +31,6 @@ module CardGame
       string.split(/\s+/).map(&Card.method(:from_string))
     end
   end
-
-  # @private
-  class NumberedRank < Rank
-    values do
-      attribute :n, Integer
-    end
-
-    def to_s
-      n.to_s
-    end
-
-    def inspect
-      "R#{n}"
-    end
-  end
-
-  # @private
-  class NamedRank < Rank
-    values do
-      attribute :name, String
-      attribute :short
-    end
-
-    def to_s
-      short || name[0]
-    end
-
-    alias_method :inspect, :to_s
-  end
-
-  # @private
-  Jack  = NamedRank.new(name: 'Jack')
-  # @private
-  Queen = NamedRank.new(name: 'Queen')
-  # @private
-  King  = NamedRank.new(name: 'King')
-  # @private
-  Ace   = NamedRank.new(name: 'Ace')
-  # @private
-  Joker = NamedRank.new(name: 'Joker', short: 'Jk')
-
-  # @private
-  Numbers = (2..10).map {|n| NumberedRank.new(n: n) }
-  # @private
-  Faces   = [Jack, Queen, King]
-  # @private
-  AllRanks = Numbers + Faces + [Ace, Joker]
 
   # Suit of a card, such as hearts or diamonds.  This is a very dumb object,
   # just providing basic equality and inspection.
@@ -177,7 +108,7 @@ module CardGame
     #   Card.from_string("KS")  # King of spades
     #   Card.from_string("2C")  # Two of clubs
     def self.from_string(value)
-      return new(suit: Suit.none, rank: Joker) if value == "Jk"
+      return new(suit: Suit.none, rank: Rank.joker) if value == "Jk"
 
       short_suit = value[-1]
       suit = {
@@ -188,11 +119,11 @@ module CardGame
       }.fetch(short_suit)
 
       rank = {
-        'A' => Ace,
-        'K' => King,
-        'Q' => Queen,
-        'J' => Jack,
-      }.fetch(value[0]) { NumberedRank.new(n: value[0..-2].to_i) }
+        'A' => Rank.ace,
+        'K' => Rank.king,
+        'Q' => Rank.queen,
+        'J' => Rank.jack,
+      }.fetch(value[0]) { Rank.numbered(value[0..-2].to_i) }
 
       new(suit: suit, rank: rank)
     end

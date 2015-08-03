@@ -131,10 +131,10 @@ module CardGame
     end
 
     # @private
-    AceHigh = FromArray.new(ranking: Numbers + Faces + [Ace])
+    AceHigh = FromArray.new(ranking: Rank.numbers + Rank.faces + [Rank.ace])
 
     # @private
-    AceLow  = FromArray.new(ranking: [Ace] + Numbers + Faces)
+    AceLow  = FromArray.new(ranking: [Rank.ace] + Rank.numbers + Rank.faces)
 
     # Order aces high, ignoring suit.
     #
