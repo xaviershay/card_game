@@ -27,7 +27,7 @@ describe CardGame::Poker do
         .map {|suit, rank|
           CardGame::Card.new(
             suit: suits[suit.to_i-1],
-            rank: CardGame::Ranking::AceLow.ranking[rank.to_i - 1]
+            rank: CardGame::Ordering::AceLow.ranking[rank.to_i - 1]
           )
         }
 

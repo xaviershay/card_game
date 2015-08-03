@@ -34,7 +34,7 @@ module CardGame
   #
   # @attr_reader rank [Rank] Rank of the card.
   # @attr_reader suit [Suit] Suit of the card.
-  # @see CardGame::Ranking
+  # @see CardGame::Ordering
   class Card
     include ValueObject
 

@@ -1,5 +1,5 @@
 require 'card_game/card'
-require 'card_game/ranking'
+require 'card_game/ordering'
 require 'card_game/trick'
 
 module CardGame
@@ -28,13 +28,13 @@ module CardGame
       right_bower = Card.new(rank: Rank.jack, suit: trick.trump)
       joker       = Card.new(rank: Rank.joker, suit: Suit.none)
 
-      trick.cards.sort_by(&Ranking.composite(
-        Ranking.match(joker),
-        Ranking.match(right_bower),
-        Ranking.match(left_bower),
-        Ranking.suit(trick.trump),
-        Ranking.suit(led.suit),
-        Ranking.ace_high,
+      trick.cards.sort_by(&Ordering.composite(
+        Ordering.match(joker),
+        Ordering.match(right_bower),
+        Ordering.match(left_bower),
+        Ordering.suit(trick.trump),
+        Ordering.suit(led.suit),
+        Ordering.ace_high,
       )).last
     end
 
@@ -48,12 +48,12 @@ module CardGame
     #
     # @return [Array<Card>]
     def self.deck
-      ranking = Ranking.ace_high
+      ordering = Ordering.ace_high
 
       (Rank.all - [Rank.joker]).product(Suit.all - [Suit.none])
         .map {|rank, suit| Card.new(rank: rank, suit: suit) }
         .select {|card|
-          ranking[card] >= ranking[LOWEST_RANKS.fetch(card.suit.color)]
+          ordering[card] >= ordering[LOWEST_RANKS.fetch(card.suit.color)]
         } + [Card.new(rank: Rank.joker, suit: Suit.none)]
     end
   end

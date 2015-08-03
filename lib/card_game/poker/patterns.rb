@@ -1,5 +1,5 @@
 require 'card_game/value_object'
-require 'card_game/ranking'
+require 'card_game/ordering'
 
 module CardGame
   class Poker
@@ -70,7 +70,7 @@ module CardGame
         end
 
         def key
-          cards.map(&Ranking.ace_high).sort.reverse
+          cards.map(&Ordering.ace_high).sort.reverse
         end
 
         def self.apply(hand)
@@ -102,7 +102,7 @@ module CardGame
         def key
           [
             n,
-            Ranking.ace_high[Card.unsuited(rank)],
+            Ordering.ace_high[Card.unsuited(rank)],
             HighCard.new(cards: remainder)
           ]
         end
@@ -125,7 +125,7 @@ module CardGame
               .to_a
               .select {|_, cards| cards.size == n }
               .sort_by {|rank, cards|
-                [cards.size, Ranking.ace_high[Card.unsuited(rank)]]
+                [cards.size, Ordering.ace_high[Card.unsuited(rank)]]
               }
               .pop
 
@@ -164,8 +164,8 @@ module CardGame
 
         def key
           [
-            Ranking.ace_high[Card.unsuited(first)],
-            Ranking.ace_high[Card.unsuited(second)],
+            Ordering.ace_high[Card.unsuited(first)],
+            Ordering.ace_high[Card.unsuited(second)],
             HighCard.new(cards: remainder),
           ]
         end
@@ -178,7 +178,7 @@ module CardGame
         end
 
         def self.apply(hand)
-          result = [Ranking.ace_high, Ranking.ace_low].lazy.map {|ranking|
+          result = [Ordering.ace_high, Ordering.ace_low].lazy.map {|ranking|
             ranks = hand.map(&ranking).sort
             min = ranks.first
 
@@ -193,7 +193,7 @@ module CardGame
         end
 
         def key
-          Ranking.ace_high[Card.unsuited(high)]
+          Ordering.ace_high[Card.unsuited(high)]
         end
       end
 
