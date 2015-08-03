@@ -51,4 +51,14 @@ describe CardGame::FiveHundred, aggregate_failures: false do
       assert_winner "QH", "JH QH 10S JD"
     end
   end
+
+  specify 'generating a deck' do
+    deck = CardGame::FiveHundred.deck
+
+    expect(deck.size).to eq(43)
+    expect(deck.all? {|card| card.is_a?(CardGame::Card) }).to eq(true)
+    expect(deck.count {|card| card.rank == CardGame::Rank.joker }).to eq(1)
+    expect(deck.none? {|card| card.rank == CardGame::Rank.numbered(2) }).to \
+      eq(true)
+  end
 end

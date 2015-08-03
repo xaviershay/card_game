@@ -4,13 +4,6 @@ require 'card_game/card'
 module CardGame
   # Different schemes for ordering cards.
   module Ranking
-    # @private
-    Numbers = (2..10).map {|n| NumberedRank.new(n: n) }
-    # @private
-    Faces   = [Jack, Queen, King]
-    # @private
-    Ace     = [Ace]
-
     # A function object for a ranking scheme, allowing cards to be sorted
     # according to different criteria (ace-high, ace-low, etc).
     class Interface
@@ -138,10 +131,10 @@ module CardGame
     end
 
     # @private
-    AceHigh = FromArray.new(ranking: Numbers + Faces + Ace)
+    AceHigh = FromArray.new(ranking: Numbers + Faces + [Ace])
 
     # @private
-    AceLow  = FromArray.new(ranking: Ace + Numbers + Faces)
+    AceLow  = FromArray.new(ranking: [Ace] + Numbers + Faces)
 
     # Order aces high, ignoring suit.
     #

@@ -36,5 +36,21 @@ module CardGame
         Ranking.ace_high,
       )).last
     end
+
+    def self.deck(players: 4)
+      raise ArgumentError, "Only 4 players are supported" unless players == 4
+
+      ranking = Ranking.ace_high
+      lowest = {
+        Color.red   => Card.unsuited(NumberedRank.new(n: 4)),
+        Color.black => Card.unsuited(NumberedRank.new(n: 5)),
+      }
+
+      (Rank.all - [Joker]).product(Suit.all - [Suit.none])
+        .map {|rank, suit| Card.new(rank: rank, suit: suit) }
+        .select {|card|
+          ranking[card] >= ranking[lowest.fetch(card.suit.color)]
+        } + [Card.new(rank: Joker, suit: Suit.none)]
+    end
   end
 end

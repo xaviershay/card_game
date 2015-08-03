@@ -3,6 +3,20 @@
 require 'card_game/value_object'
 
 module CardGame
+  class Color
+    include ValueObject
+
+    attribute :name, String
+
+    Red   = new(name: "red")
+    Black = new(name: "black")
+    None  = new(name: "none")
+
+    def self.red; Red end
+    def self.black; Black end
+    def self.none; None end
+  end
+
   # The rank of a card, either the number or face name (Jack, Queen, etc...).
   # This is a very dumb object, just providing basic equality and inspection.
   class Rank
@@ -11,6 +25,18 @@ module CardGame
     # Short string representation of the rank.
     def to_s
       super
+    end
+
+    def self.all
+      AllRanks
+    end
+
+    def self.numbered(n)
+      NumberedRank.new(n: n)
+    end
+
+    def self.joker
+      Joker
     end
   end
 
@@ -68,12 +94,20 @@ module CardGame
   # @private
   Joker = NamedRank.new(name: 'Joker', short: 'Jk')
 
+  # @private
+  Numbers = (2..10).map {|n| NumberedRank.new(n: n) }
+  # @private
+  Faces   = [Jack, Queen, King]
+  # @private
+  AllRanks = Numbers + Faces + [Ace, Joker]
+
   # Suit of a card, such as hearts or diamonds.  This is a very dumb object,
   # just providing basic equality and inspection.
   class Suit
     include ValueObject
 
     attribute :symbol, String
+    attribute :color, Color
 
     # Short string representation of the suit.
     def to_s
@@ -81,18 +115,24 @@ module CardGame
     end
 
     alias_method :inspect, :to_s
+
+    def self.all
+      AllSuits
+    end
   end
 
   # @private
-  Spades   = Suit.new(symbol: "♤")
+  Hearts   = Suit.new(symbol: "♡", color: Color.red)
   # @private
-  Hearts   = Suit.new(symbol: "♡")
+  Diamonds = Suit.new(symbol: "♢", color: Color.red)
   # @private
-  Diamonds = Suit.new(symbol: "♢")
+  Clubs    = Suit.new(symbol: "♧", color: Color.black)
   # @private
-  Clubs    = Suit.new(symbol: "♧")
+  Spades   = Suit.new(symbol: "♤", color: Color.black)
   # @private
-  NoSuit   = Suit.new(symbol: "")
+  NoSuit   = Suit.new(symbol: "", color: Color.none)
+
+  AllSuits = [Hearts, Diamonds, Clubs, Spades, NoSuit]
 
   # @return Suit
   def Suit.spades; Spades end
