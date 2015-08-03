@@ -4,18 +4,25 @@ module CardGame
   class Rank
     include ValueObject
 
-    # Short string representation of the rank.
-    def to_s
-      super
+    values do
+      attribute :name, String
+      attribute :short
     end
 
-    def self.numbered(n); Private::NumberedRank.new(n: n) end
+    # Short string representation of the rank.
+    def to_s
+      short || name[0]
+    end
 
-    def self.jack;  Private::NamedRank.new(name: 'Jack') end
-    def self.queen; Private::NamedRank.new(name: 'Queen') end
-    def self.king;  Private::NamedRank.new(name: 'King') end
-    def self.ace;   Private::NamedRank.new(name: 'Ace') end
-    def self.joker; Private::NamedRank.new(name: 'Joker', short: 'Jk') end
+    alias_method :inspect, :to_s
+
+    def self.numbered(n); new(name: "R#{n}", short: n.to_s) end
+
+    def self.jack;  new(name: 'Jack') end
+    def self.queen; new(name: 'Queen') end
+    def self.king;  new(name: 'King') end
+    def self.ace;   new(name: 'Ace') end
+    def self.joker; new(name: 'Joker', short: 'Jk') end
 
     def self.all
       numbers + faces + [ace, joker]
@@ -33,38 +40,6 @@ module CardGame
 
     def initialize(*args)
       super
-    end
-  end
-
-  # @private
-  module Rank::Private
-    # @private
-    class NumberedRank < Rank
-      values do
-        attribute :n, Integer
-      end
-
-      def to_s
-        n.to_s
-      end
-
-      def inspect
-        "R#{n}"
-      end
-    end
-
-    # @private
-    class NamedRank < Rank
-      values do
-        attribute :name, String
-        attribute :short
-      end
-
-      def to_s
-        short || name[0]
-      end
-
-      alias_method :inspect, :to_s
     end
   end
 end

@@ -42,7 +42,7 @@ module CardGame
 
     # Short string representation of the suit.
     def to_s
-      symbol + " "
+      symbol
     end
 
     alias_method :inspect, :to_s
@@ -53,13 +53,13 @@ module CardGame
   end
 
   # @private
-  Hearts   = Suit.new(symbol: "♡", color: Color.red)
+  Hearts   = Suit.new(symbol: "♡ ", color: Color.red)
   # @private
-  Diamonds = Suit.new(symbol: "♢", color: Color.red)
+  Diamonds = Suit.new(symbol: "♢ ", color: Color.red)
   # @private
-  Clubs    = Suit.new(symbol: "♧", color: Color.black)
+  Clubs    = Suit.new(symbol: "♧ ", color: Color.black)
   # @private
-  Spades   = Suit.new(symbol: "♤", color: Color.black)
+  Spades   = Suit.new(symbol: "♤ ", color: Color.black)
   # @private
   NoSuit   = Suit.new(symbol: "", color: Color.none)
 
