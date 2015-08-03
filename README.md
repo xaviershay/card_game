@@ -33,3 +33,13 @@ You can calculate winning cards in Five hundred tricks.
       trump: Suit.clubs,
     ))
     # => Card.from_string("10S")
+
+There are also silly monkeypatches you probably don't want to use in real life, but make for fun READMEs.
+
+    require 'card_game/core_ext'
+
+    FiveHundred.winning_card(Trick.new(
+      cards: [ "A".♡, 5.♢, 10.♧, "A".♢ ],
+      trump: Suit.♢,
+    ))
+    # => Card.from_string("AD")
