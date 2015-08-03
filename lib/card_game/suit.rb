@@ -8,7 +8,8 @@ module CardGame
   # +Suit+ objects cannot be instantiated directly. Instead, use one of the
   # provided class-level builder methods.
   #
-  # @attr_reader symbol [String] Pictorial representation of suit.
+  # @attr_reader symbol [String] Pictorial representation of suit. May be
+  #                              unicode.
   # @attr_reader color [Color] Color of the suit.
   class Suit
     include ValueObject
