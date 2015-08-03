@@ -23,6 +23,8 @@ module CardGame
   # Represents a playing card of rank and suit. This object is deliberately
   # _not_ comparable. Different games defined their own orderings.
   #
+  # @attr_reader rank [Rank] Rank of the card.
+  # @attr_reader suit [Suit] Suit of the card.
   # @see CardGame::Ranking
   class Card
     include ValueObject
