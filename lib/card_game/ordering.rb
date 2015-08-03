@@ -48,6 +48,18 @@ module CardGame
       Composite.new(children: children)
     end
 
+    # Wraps the given +Orderable+ so that ranks can be ordered directly. The
+    # returned proc takes a +Rank+ and wraps it in an unsuited +Card+ before
+    # passing it to the child.
+    #
+    # @param child [Orderable]
+    # @return [Proc]
+    def self.rank_only(child)
+      -> rank {
+        child[Card.unsuited(rank)]
+      }
+    end
+
     # Any card matching the suit is ranked higher than any card of non-matching
     # suits.
     #
@@ -70,26 +82,13 @@ module CardGame
     # according to different criteria (ace-high, ace-low, etc).
     class Orderable
       # Returns a consistent token for a +Card+ that will sort with the
-      # scheme's properties. Tokens are guaranteed sequential over the full set
-      # of cards, but may not be unique i.e. two cards may produce the same
-      # token. The token is not guaranteed stable across versions and should
-      # not be persisted.
+      # scheme's properties. Tokens may not be unique: two cards may produce
+      # the same token. The token is not guaranteed stable across versions and
+      # should not be persisted.
       #
-      # +succ+ is provided on tokens for convenience of identifying straights
-      # (+A-2-3-4-5+). It returns the next sequential token in an ordering, but
-      # does not map back to a specific +Card+ since multiple cards may have
-      # that same next token.
-      #
-      # @return [Comparable, #succ] An opaque sortable token.
+      # @return [Comparable] An opaque sortable token.
       # @param card CardGame::Card
       def call(card)
-      end
-
-      # The highest ranking token that could be returned by +call+. Useful when
-      # constructing ranges. +succ+ on the token will return +nil+.
-      #
-      # @return [Comparable, #succ] An opaque sortable token.
-      def max
       end
 
       # Wraps +call+ in a proc. Suitable for use in +map+ and friends.
@@ -113,19 +112,16 @@ module CardGame
       end
 
       def call(card)
-        ranking.index(card.rank) || raise(ArgumentError,
+        token = ranking.index(card.rank) || raise(ArgumentError,
           "Cannot order #{card.rank}. Known ranks: #{ranking}")
-      end
 
-      def max
-        ranking.length - 1
+        ScopedToken.new(token: token, parent: self)
       end
 
       alias_method :[], :call
     end
 
     # @private
-    # TODO: Wrap result to provide succ.
     class Composite < Orderable
       include ValueObject
 
@@ -134,7 +130,7 @@ module CardGame
       end
 
       def call(card)
-        children.map do |x|
+        token = children.map do |x|
           begin
             x.call(card)
           rescue ArgumentError => e
@@ -144,12 +140,9 @@ module CardGame
             Unrankable.new(e)
           end
         end
+        ScopedToken.new(token: token, parent: self)
       end
       alias_method :[], :call
-
-      def max
-        children.map(&:max)
-      end
 
       # @private
       class Unrankable < BasicObject
@@ -178,39 +171,9 @@ module CardGame
       end
 
       def call(card)
-        Wrapper.new(condition.call(card) ? 1 : 0)
+        ScopedToken.new(token: condition.call(card) ? 1 : 0, parent: self)
       end
       alias_method :[], :call
-
-      def max
-        1
-      end
-
-      # Wrap integer response so that +succ+ returns +nil+ once maximum value
-      # is reached.
-      #
-      # @private
-      class Wrapper
-        include Comparable
-
-        attr_reader :n
-
-        def initialize(n)
-          @n = n
-        end
-
-        def <=>(other)
-          unless Wrapper === other
-            raise "Cannot compare #{self.class} with #{other.class}"
-          end
-
-          n <=> other.n
-        end
-
-        def succ
-          Wrapper.new(1) if n == 0
-        end
-      end
     end
 
     # @private
@@ -218,5 +181,35 @@ module CardGame
 
     # @private
     AceLow  = FromArray.new(ranking: [Rank.ace] + Rank.numbers + Rank.faces)
+
+    # @private
+    class ScopedToken
+      include ValueObject
+      include Comparable
+
+      values do
+        # Token should implement <=>. You'd think that means it is Comparable,
+        # but Array does not implement that interface.
+        attribute :token
+        # Parent can be any object that implements equality.
+        attribute :parent
+      end
+
+      def <=>(other)
+        unless self.class === other
+          raise "Cannot compare #{self.class} with #{other.class}"
+        end
+
+        unless parent == other.parent
+          raise "Cannot compare tokens from different orderings: %s and %s" % [
+            parent,
+            other.parent
+          ]
+        end
+
+        token <=> other.token
+      end
+    end
+
   end
 end

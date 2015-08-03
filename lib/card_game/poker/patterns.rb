@@ -1,5 +1,8 @@
+require 'set'
+
 require 'card_game/value_object'
 require 'card_game/ordering'
+require 'card_game/poker/deck'
 
 module CardGame
   class Poker
@@ -173,23 +176,29 @@ module CardGame
 
       # @private
       class Straight < Pattern
+        ORDERINGS = [
+          Ordering.ace_high,
+          Ordering.ace_low
+        ].map {|ordering|
+          [
+            ordering,
+            Set.new(
+              Deck.ranks.sort_by(&Ordering.rank_only(ordering)).each_cons(5)
+            )
+          ]
+        }.to_h
+
         values do
           attribute :high, Rank
         end
 
         def self.apply(hand)
-          result = [Ordering.ace_high, Ordering.ace_low].lazy.map {|ranking|
-            ranks = hand.map(&ranking).sort
-            min = ranks.first
-
-            expected = (min..ranking.max).take(5)
-
-            if expected.size == 5 && expected.zip(ranks).all? {|x, y| x == y }
-              hand.sort_by(&ranking).last
-            end
+          result = ORDERINGS.lazy.map {|ordering, ranking|
+            ranks = hand.sort_by(&ordering).map(&:rank)
+            ranks.last if ranking.include?(ranks)
           }.detect {|x| x }
 
-          new(high: result.rank) if result
+          new(high: result) if result
         end
 
         def key
