@@ -1,4 +1,5 @@
 require 'card_game/poker/patterns'
+require 'card_game/poker/deck'
 
 module CardGame
   # Utility methods for modeling poker.
@@ -19,6 +20,13 @@ module CardGame
         .detect(
           ->{ raise "Assertion failed: no matching pattern for #{hand}" }
         ) {|x| x }
+    end
+
+    # Creates a deck suitable for poker.
+    #
+    # @return [Array<Card>]
+    def self.deck
+      Deck.deck
     end
   end
 end

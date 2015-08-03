@@ -142,4 +142,12 @@ describe CardGame::Poker, aggregate_failures: true do
       end
     end
   end
+
+  specify '.deck' do
+    deck = CardGame::Poker.deck
+
+    expect(deck.size).to eq(52)
+    expect(deck.all? {|card| card.is_a?(CardGame::Card) }).to eq(true)
+    expect(deck.none? {|card| card.rank == CardGame::Rank.joker }).to eq(true)
+  end
 end
