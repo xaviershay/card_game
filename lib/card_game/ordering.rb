@@ -170,7 +170,6 @@ module CardGame
     end
 
     # @private
-    # TODO: Wrap response to provide succ
     class Binary < Orderable
       include ValueObject
 
@@ -179,16 +178,38 @@ module CardGame
       end
 
       def call(card)
-        if condition.call(card)
-          1
-        else
-          0
-        end
+        Wrapper.new(condition.call(card) ? 1 : 0)
       end
       alias_method :[], :call
 
       def max
         1
+      end
+
+      # Wrap integer response so that +succ+ returns +nil+ once maximum value
+      # is reached.
+      #
+      # @private
+      class Wrapper
+        include Comparable
+
+        attr_reader :n
+
+        def initialize(n)
+          @n = n
+        end
+
+        def <=>(other)
+          unless Wrapper === other
+            raise "Cannot compare #{self.class} with #{other.class}"
+          end
+
+          n <=> other.n
+        end
+
+        def succ
+          Wrapper.new(1) if n == 0
+        end
       end
     end
 
