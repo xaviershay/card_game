@@ -2,21 +2,9 @@
 
 require 'card_game/value_object'
 require 'card_game/rank'
+require 'card_game/suit'
 
 module CardGame
-  class Color
-    include ValueObject
-
-    attribute :name, String
-
-    Red   = new(name: "red")
-    Black = new(name: "black")
-    None  = new(name: "none")
-
-    def self.red; Red end
-    def self.black; Black end
-    def self.none; None end
-  end
 
   # Represents a hand of multiple cards. Current this is actually represented
   # as an array.
@@ -31,50 +19,6 @@ module CardGame
       string.split(/\s+/).map(&Card.method(:from_string))
     end
   end
-
-  # Suit of a card, such as hearts or diamonds.  This is a very dumb object,
-  # just providing basic equality and inspection.
-  class Suit
-    include ValueObject
-
-    attribute :symbol, String
-    attribute :color, Color
-
-    # Short string representation of the suit.
-    def to_s
-      symbol
-    end
-
-    alias_method :inspect, :to_s
-
-    def self.all
-      AllSuits
-    end
-  end
-
-  # @private
-  Hearts   = Suit.new(symbol: "♡ ", color: Color.red)
-  # @private
-  Diamonds = Suit.new(symbol: "♢ ", color: Color.red)
-  # @private
-  Clubs    = Suit.new(symbol: "♧ ", color: Color.black)
-  # @private
-  Spades   = Suit.new(symbol: "♤ ", color: Color.black)
-  # @private
-  NoSuit   = Suit.new(symbol: "", color: Color.none)
-
-  AllSuits = [Hearts, Diamonds, Clubs, Spades, NoSuit]
-
-  # @return Suit
-  def Suit.spades; Spades end
-  # @return Suit
-  def Suit.hearts; Hearts end
-  # @return Suit
-  def Suit.diamonds; Diamonds end
-  # @return Suit
-  def Suit.clubs; Clubs end
-  # @return Suit
-  def Suit.none; NoSuit end
 
   # Represents a playing card of rank and suit. This object is deliberately
   # _not_ comparable. Different games defined their own orderings.
@@ -112,10 +56,10 @@ module CardGame
 
       short_suit = value[-1]
       suit = {
-        "H" => Hearts,
-        "D" => Diamonds,
-        "S" => Spades,
-        "C" => Clubs,
+        "H" => Suit.hearts,
+        "D" => Suit.diamonds,
+        "S" => Suit.spades,
+        "C" => Suit.clubs,
       }.fetch(short_suit)
 
       rank = {
