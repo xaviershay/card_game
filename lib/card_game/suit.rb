@@ -33,6 +33,24 @@ module CardGame
     # @return [Suit]
     def self.none;     Suit.new(symbol: "",   color: Color.none) end
 
+    class << self
+      alias_method :♡, :hearts
+      alias_method :♥︎, :hearts
+      alias_method :♥️︎, :hearts
+
+      alias_method :♢, :diamonds
+      alias_method :♦︎, :diamonds
+      alias_method :♦️, :diamonds
+
+      alias_method :♧, :clubs
+      alias_method :♣︎, :clubs
+      alias_method :♣️, :clubs
+
+      alias_method :♤, :spades
+      alias_method :♠︎, :spades
+      alias_method :♠️︎, :spades
+    end
+
     # All suits, including +none+.
     # @return [Array<Suit>]
     def self.all
