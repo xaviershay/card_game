@@ -1,7 +1,15 @@
 require 'card_game/card'
 
 module CardGame
-  # These are silly monkeypatches that you probably don't want to use in real life
+  # These are silly monkey-patches for constructing cards that you probably
+  # don't want to use in real life.
+  #
+  # @example
+  #     require 'card_game/core_ext'
+  #
+  #     4.hearts
+  #     4.♥️︎
+  #     "A".♣️
   module CoreExt
     # @return [Card]
     def hearts
@@ -41,10 +49,16 @@ module CardGame
   end
 end
 
+# Monkey-patches only applied if +card_game/core_ext+ is explicitly required.
+#
+# @see CardGame::CoreExt
 class String
   include CardGame::CoreExt
 end
 
+# Monkey-patches only applied if +card_game/core_ext+ is explicitly required.
+#
+# @see CardGame::CoreExt
 class Integer
   include CardGame::CoreExt
 end

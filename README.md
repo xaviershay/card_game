@@ -10,36 +10,43 @@ Synopsis
 
 You can compare poker hands.
 
-    require 'card_game/poker'
+```
+require 'card_game/poker'
 
-    include CardGame
+include CardGame
 
-    Poker.classify(Hand.build("10H JH QH KH AH")) >
-    Poker.classify(Hand.build("AH AD AS AC KH"))
-    # => true
+Poker.classify(Hand.build("10H JH QH KH AH")) >
+Poker.classify(Hand.build("AH AD AS AC KH"))
+# => true
+```
 
 You can calculate winning cards in Five hundred tricks.
 
-    require 'card_game/five_hundred'
+```
+require 'card_game/five_hundred'
 
-    FiveHundred.winning_card(Trick.new(
-      cards: Hand.build("10S JD AH 10D"),
-      trump: Suit.hearts,
-    ))
-    # => Card.from_string("JD")
+FiveHundred.winning_card(Trick.new(
+  cards: Hand.build("10S JD AH 10D"),
+  trump: Suit.hearts,
+))
+# => Card.from_string("JD")
 
-    FiveHundred.winning_card(Trick.new(
-      cards: Card.array_from_string("10S JD AH 10D"),
-      trump: Suit.clubs,
-    ))
-    # => Card.from_string("10S")
+FiveHundred.winning_card(Trick.new(
+  cards: Card.array_from_string("10S JD AH 10D"),
+  trump: Suit.clubs,
+))
+# => Card.from_string("10S")
+```
 
-There are also silly monkeypatches you probably don't want to use in real life, but make for fun READMEs.
+There are also silly monkeypatches you probably don't want to use in real life,
+but make for fun READMEs.
 
-    require 'card_game/core_ext'
+```
+require 'card_game/core_ext'
 
-    FiveHundred.winning_card(Trick.new(
-      cards: [ "A".♡, 5.♢, 10.♧, "A".♢ ],
-      trump: Suit.♢,
-    ))
-    # => Card.from_string("AD")
+FiveHundred.winning_card(Trick.new(
+  cards: [ "A".♡, 5.♢, 10.♧, "A".♢ ],
+  trump: Suit.♢,
+))
+# => Card.from_string("AD")
+```
