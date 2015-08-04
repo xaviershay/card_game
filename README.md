@@ -10,7 +10,7 @@ Synopsis
 
 You can compare poker hands.
 
-```
+``` ruby
 require 'card_game/poker'
 
 include CardGame
@@ -22,7 +22,7 @@ Poker.classify(Hand.build("AH AD AS AC KH"))
 
 You can calculate winning cards in Five hundred tricks.
 
-```
+``` ruby
 require 'card_game/five_hundred'
 
 FiveHundred.winning_card(Trick.new(
@@ -41,7 +41,7 @@ FiveHundred.winning_card(Trick.new(
 There are also silly monkeypatches you probably don't want to use in real life,
 but make for fun READMEs.
 
-```
+``` ruby
 require 'card_game/core_ext'
 
 FiveHundred.winning_card(Trick.new(
