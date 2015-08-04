@@ -9,7 +9,7 @@ module CardGame
       end
 
       def self.deck
-        ranks.product(Suit.all - [Suit.none]).map do |rank, suit|
+        ranks.product(Suit.all).map do |rank, suit|
           Card.build(rank, suit)
         end
       end

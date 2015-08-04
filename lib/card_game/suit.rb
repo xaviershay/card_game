@@ -51,10 +51,10 @@ module CardGame
       alias_method :♠️︎, :spades
     end
 
-    # All suits, including +none+.
+    # All suits, excluding +none+.
     # @return [Array<Suit>]
     def self.all
-      [hearts, diamonds, clubs, spades, none]
+      [hearts, diamonds, clubs, spades]
     end
 
     private

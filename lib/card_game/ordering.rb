@@ -24,6 +24,13 @@ module CardGame
       AceLow
     end
 
+    # Order by rank index in the supplied array.
+    #
+    # @param ranking [Array<Rank>]
+    def self.by_rank(ranking)
+      FromArray.new(ranking: ranking)
+    end
+
     # Create a composite ordering from child orderings. Left-most supplied
     # orderings are used first, with subsequent used to break ties.
     #

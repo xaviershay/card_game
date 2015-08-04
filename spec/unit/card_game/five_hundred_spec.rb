@@ -50,15 +50,47 @@ describe CardGame::FiveHundred, aggregate_failures: false do
     it 'ignores bowers when no trumps' do
       assert_winner "QH", "JH QH 10S JD"
     end
+
+    it 'handles extra cards for six player' do
+      assert_winner "13H", "13H 12H 11H 10H"
+    end
   end
 
-  specify 'generating a deck' do
+  specify 'generating a three player deck' do
+    deck = CardGame::FiveHundred.deck(players: 3)
+
+    expect(deck.size).to eq(33)
+    expect(deck.all? {|card| card.is_a?(CardGame::Card) }).to eq(true)
+    expect(deck.count {|card| card.rank == CardGame::Rank.joker }).to eq(1)
+      eq(true)
+  end
+
+  specify 'generating a four player deck' do
     deck = CardGame::FiveHundred.deck
 
     expect(deck.size).to eq(43)
     expect(deck.all? {|card| card.is_a?(CardGame::Card) }).to eq(true)
     expect(deck.count {|card| card.rank == CardGame::Rank.joker }).to eq(1)
     expect(deck.none? {|card| card.rank == CardGame::Rank.numbered(2) }).to \
+      eq(true)
+  end
+
+  specify 'generating a five player deck' do
+    deck = CardGame::FiveHundred.deck(players: 5)
+
+    expect(deck.size).to eq(53)
+    expect(deck.all? {|card| card.is_a?(CardGame::Card) }).to eq(true)
+    expect(deck.count {|card| card.rank == CardGame::Rank.joker }).to eq(1)
+      eq(true)
+  end
+
+  specify 'generating a six player deck' do
+    deck = CardGame::FiveHundred.deck(players: 6)
+
+    expect(deck.size).to eq(63)
+    expect(deck.all? {|card| card.is_a?(CardGame::Card) }).to eq(true)
+    expect(deck.count {|card| card.rank == CardGame::Rank.joker }).to eq(1)
+    expect(deck.any? {|card| card.rank == CardGame::Rank.numbered(12) }).to \
       eq(true)
   end
 end

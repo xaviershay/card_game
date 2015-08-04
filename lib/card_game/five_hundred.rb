@@ -34,27 +34,58 @@ module CardGame
         Ordering.match(left_bower),
         Ordering.suit(trick.trump),
         Ordering.suit(led.suit),
-        Ordering.ace_high,
+        Ordering.by_rank(ALL_RANKS),
       )).last
     end
 
-    # @private
-    LOWEST_RANKS = {
-      Color.red   => Card.unsuited(Rank.numbered(4)),
-      Color.black => Card.unsuited(Rank.numbered(5)),
+    # Creates a deck suitable for Five Hundred.
+    #
+    # @param players [Integer] The number of players. Must be between 3 and 6.
+    # @return [Array<Card>]
+    def self.deck(players: 4)
+      joker = [Card.unsuited(Rank.joker)]
+
+      ranks_for_colors = DECK_SPECIFICATION.fetch(players) {
+        raise ArgumentError,
+          "Only 3 to 6 players are supported, not #{players}"
+      }
+
+      joker + ALL_RANKS.product(Suit.all)
+        .map {|rank, suit| Card.build(rank, suit) }
+        .select {|card|
+          ranks_for_colors.fetch(card.suit.color).include?(card.rank)
+        }
+    end
+
+    make_ranks = -> r {
+      r.map(&Rank.method(:numbered)) + Rank.faces + [Rank.ace]
     }
 
-    # Creates a deck suitable for Five Hundred with four players.
+    # Deck specifications for different numbers of players.
     #
-    # @return [Array<Card>]
-    def self.deck
-      ordering = Ordering.ace_high
+    # @private
+    DECK_SPECIFICATION = {
+      3 => {
+        Color.red   => make_ranks.(7..10),
+        Color.black => make_ranks.(7..10),
+      },
+      4 => {
+        Color.red   => make_ranks.(4..10),
+        Color.black => make_ranks.(5..10),
+      },
+      5 => {
+        Color.red   => make_ranks.(2..10),
+        Color.black => make_ranks.(2..10),
+      },
+      6 => {
+        Color.red   => make_ranks.(2..13),
+        Color.black => make_ranks.(2..12),
+      }
+    }
 
-      (Rank.all - [Rank.joker]).product(Suit.all - [Suit.none])
-        .map {|rank, suit| Card.new(rank: rank, suit: suit) }
-        .select {|card|
-          ordering[card] >= ordering[LOWEST_RANKS.fetch(card.suit.color)]
-        } + [Card.new(rank: Rank.joker, suit: Suit.none)]
-    end
+    # All known ranks.
+    #
+    # @private
+    ALL_RANKS = DECK_SPECIFICATION.fetch(6)[Color.red]
   end
 end
