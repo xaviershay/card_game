@@ -1,3 +1,3 @@
 #!/bin/bash
 
-exec bundle exec xspec spec/unit/**/*.rb
+exec bundle exec xspec spec/unit/**/*.rb "$@"
