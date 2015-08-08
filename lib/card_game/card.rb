@@ -52,6 +52,10 @@ module CardGame
 
     alias_method :inspect, :to_s
 
+    def pretty_print(pp)
+      pp.text to_s
+    end
+
     # Construct a card from a shorthand string syntax. Suits are represented by
     # the first letter of their name (+H+ for hearts), as are ranks although
     # numbers are numeric.

@@ -2,6 +2,8 @@ require 'card_game/card'
 require 'card_game/ordering'
 require 'card_game/trick'
 
+require 'card_game/five_hundred/state'
+
 module CardGame
   # Utility methods for modeling five hundred.
   class FiveHundred
@@ -87,5 +89,348 @@ module CardGame
     #
     # @private
     ALL_RANKS = DECK_SPECIFICATION.fetch(6)[Color.red]
+
+    def self.play(players: )
+      Game.new(players: players)
+    end
+
+    module Action
+      # TODO: This is actual CoreBid
+      class Core
+        include ValueObject
+        include Comparable
+
+        values do
+          attribute :actor
+        end
+
+        def <=>(other)
+          key <=> other.key
+        end
+      end
+
+      class Bid < Core
+        values do
+          attribute :number, Integer
+          attribute :suit, Suit
+        end
+
+        def self.build(actor, number, suit)
+          new(actor: actor, number: number, suit: suit)
+        end
+
+        def key
+          [number]
+        end
+
+        def score
+          suit_score = [
+            Suit.spades,
+            Suit.clubs,
+            Suit.diamonds,
+            Suit.hearts,
+            Suit.none
+          ].index(suit) * 20 + 40
+
+          (number - 6) * 100 + suit_score
+        end
+
+        def to_s
+          "<Bid %s %i%s>" % [actor, number, suit]
+        end
+        alias_method :inspect, :to_s
+
+        def pretty_print(pp)
+          pp.text(to_s)
+        end
+      end
+
+      class Pass < Core
+        def self.build(actor)
+          new(actor: actor)
+        end
+
+        def key
+          [0]
+        end
+      end
+
+      class Play
+        include ValueObject
+
+        values do
+          attribute :actor
+          attribute :card, Card
+        end
+      end
+
+      class Kitty
+        include ValueObject
+
+        values do
+          attribute :actor
+          attribute :cards, [Card]
+        end
+      end
+    end
+
+    class Player
+      include ValueObject
+
+      values do
+        attribute :position, Integer
+      end
+
+      def bid(n, suit)
+        Action::Bid.build(self, n, suit)
+      end
+
+      def pass
+        Action::Pass.build(self)
+      end
+
+      def play(card)
+        Action::Play.new(actor: self, card: card)
+      end
+
+      def kitty(cards)
+        Action::Kitty.new(actor: self, cards: cards)
+      end
+
+      def name
+        "Player"
+      end
+
+      def to_s
+        "<#{name} %i>" % position
+      end
+      alias_method :inspect, :to_s
+
+      def pretty_print(pp)
+        pp.text(to_s)
+      end
+    end
+
+    module Phase
+      class Abstract
+        attr_reader :state
+
+        def self.enter(state); new(state).enter end
+        def self.exit(state); new(state).exit end
+        def self.apply(state, action); new(state).apply(action) end
+        def self.transition(state); new(state).transition end
+
+        def initialize(state)
+          @state = state
+        end
+
+        def enter; state end
+        def exit; state end
+        def apply(action); state end
+        def transition; end
+      end
+
+      class Setup < Abstract
+        def enter
+          actors = (1..4).map {|x| Player.new(position: x) }
+          state
+            .setup_actors(actors)
+            .give_deal(actors.first) # TODO: sample, store seed in state
+        end
+
+        def transition
+          NewRound
+        end
+      end
+
+      class NewRound < Abstract
+        def enter
+          deck = FiveHundred.deck(players: state.players).shuffle
+
+          state
+            .deal(
+              hands: state.actors.map {|actor|
+                [actor, deck.shift(10)]
+              }.to_h,
+              kitty: deck.shift(3),
+            )
+            .advance_dealer
+            .give_priority(state.dealer)
+            .reset_bid(Action::Pass.new({}))
+        end
+
+        def transition
+          Bidding
+        end
+      end
+
+      module RequirePriority
+        def apply(action)
+          super
+
+          if action.actor != state.priority
+            raise "#{action.actor} may not act, #{state.priority} has priority"
+          end
+        end
+      end
+
+      class Bidding < Abstract
+        include RequirePriority
+
+        def apply(action)
+          super
+
+          if action > state.bid
+            state.advance(bid: action)
+          else
+            state.advance
+          end
+        end
+
+        def transition
+          Kitty if state.bid.actor == state.priority
+        end
+      end
+
+      class Kitty < Abstract
+        include RequirePriority
+
+        def enter
+          state.move_kitty_to_hand
+        end
+
+        def apply(action)
+          super
+
+          state.move_cards_to_kitty(action.cards)
+        end
+
+        def transition
+          Phase::Trick if state.kitty.size == 3
+        end
+      end
+
+      class Trick < Abstract
+        include RequirePriority
+
+        def enter
+          state.new_trick
+        end
+
+        def exit
+          card = FiveHundred.winning_card(state.trick)
+          i = state.trick.cards.index(card)
+
+          winner = state.player_relative_to_priority(i)
+
+          state
+            .won_trick(winner)
+            .give_priority(winner)
+        end
+
+        def apply(action)
+          super
+
+          case action
+          when Action::Play
+            state
+
+            if !state.priority_hand.include?(action.card)
+              raise "#{action.card} is not in hand of #{action.actor}"
+            end
+
+            state
+              .add_card_to_trick(action.card)
+              .advance
+          end
+        end
+
+        def transition
+          return Scoring if state.hands.values.all?(&:empty?)
+          return Trick if state.trick.size == state.players
+        end
+      end
+
+      class Scoring < Abstract
+        def enter
+          bidding_team = state.team_for(state.bid.actor)
+          tricks_won = bidding_team.map do |actor|
+            state.won.fetch(actor, 0)
+          end.reduce(:+)
+
+          new_state = if tricks_won > state.bid.number
+            state
+              .adjust_score(bidding_team, state.bid.score)
+          else
+            state
+              .adjust_score(bidding_team, -state.bid.score)
+          end
+
+          opposing_team = state.actors - bidding_team
+
+          tricks_won = opposing_team.map do |actor|
+            new_state.won.fetch(actor, 0)
+          end.reduce(:+)
+
+          new_state
+            .adjust_score(opposing_team, tricks_won * 10)
+        end
+
+        def exit
+          state.clear_tricks
+        end
+
+        def transition
+          if state.scores.values.any? {|x| !(-500..500).cover?(x) }
+            Completed
+          else
+            NewRound
+          end
+        end
+      end
+
+      class Completed < Abstract
+      end
+    end
+
+    # Phases operate on state
+    # Game passes state and action to phases and manages transitions
+    # State is immutable
+    class Game
+      attr_accessor :state, :phase
+
+      def initialize
+        @phase = Phase::Setup
+        @state = @phase.enter(State.new)
+
+        transition
+      end
+
+      def apply(action)
+        self.state = phase.apply(state, action)
+
+        transition
+      end
+
+      def transition
+        new_phase = phase.transition(state)
+
+        if new_phase
+          self.state = phase.exit(state)
+          self.phase = new_phase
+          self.state = phase.enter(state)
+
+          transition
+        end
+      end
+
+      def actors
+        hands.keys
+      end
+
+      def hands
+        state.hands
+      end
+    end
   end
 end

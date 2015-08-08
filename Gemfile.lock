@@ -1,6 +1,9 @@
 GEM
   remote: https://rubygems.org/
   specs:
+    atomic (1.1.99)
+    hamster (1.0.0)
+      atomic (~> 1.1)
     xspec (0.2.0)
     yard (0.8.7.6)
 
@@ -8,6 +11,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  hamster
   xspec
   yard
 

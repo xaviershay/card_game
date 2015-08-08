@@ -22,6 +22,10 @@ module CardGame
     alias_method :to_s, :symbol
     alias_method :inspect, :symbol
 
+    def pretty_print(pp)
+      pp.text to_s
+    end
+
     # @return [Suit]
     def self.hearts;   Suit.new(symbol: "♡ ", color: Color.red) end
     # @return [Suit]

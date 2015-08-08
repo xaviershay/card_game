@@ -90,4 +90,32 @@ describe CardGame::FiveHundred do
       card.rank == CardGame::Rank.numbered(13)
     }
   end
+
+  CG = CardGame
+  FHA = CG::FiveHundred::Action
+
+  require 'pp'
+  it 'game' do
+    game = CG::FiveHundred::Game.new
+
+    players = game.actors
+
+    game.apply players[0].bid(6, CG::Suit.hearts)
+    game.apply players[1].pass
+    game.apply players[2].bid(7, CG::Suit.hearts)
+    game.apply players[3].pass
+    game.apply players[0].pass
+    game.apply players[1].pass
+
+    game.apply players[2].kitty(game.hands.fetch(players[2]).take(3))
+
+    (0..9).each do
+      i = players.index(game.state.priority)
+      game.apply players[(i+0) % 4].play(game.hands.fetch(players[(i+0) % 4])[0])
+      game.apply players[(i+1) % 4].play(game.hands.fetch(players[(i+1) % 4])[0])
+      game.apply players[(i+2) % 4].play(game.hands.fetch(players[(i+2) % 4])[0])
+      game.apply players[(i+3) % 4].play(game.hands.fetch(players[(i+3) % 4])[0])
+    end
+    pp game
+  end
 end
