@@ -50,3 +50,9 @@ FiveHundred.winning_card(Trick.new(
 ))
 # => Card.from_string("AD")
 ```
+
+Developing
+----------
+
+    bundle install
+    bin/test
