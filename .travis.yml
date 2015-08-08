@@ -1,4 +1,6 @@
 language: ruby
 script: bin/test
+sudo: false
+cache: bundler
 rvm:
   - 2.2.2
