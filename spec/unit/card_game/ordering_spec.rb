@@ -6,6 +6,15 @@ describe CardGame::Ordering do
   let(:joker) { CardGame::Card.from_string("Jk") }
   let(:ace) { CardGame::Card.from_string("AD") }
 
+  def assert_unorderable(orderings, card)
+    begin
+      orderings[0][card] <=> orderings[1][card]
+      fail
+    rescue => e
+      assert_include "different orderings", e.message
+    end
+  end
+
   describe '.ace_high and .ace_low' do
     it 'does not allow comparisons between different orderings' do
       orderings = [
@@ -13,9 +22,7 @@ describe CardGame::Ordering do
         CardGame::Ordering.ace_low,
       ]
 
-      expect {
-        orderings[0][ace] <=> orderings[1][ace]
-      }.to raise_error(/different orderings/)
+      assert_unorderable orderings, ace
     end
 
     it 'does allow comparisons between different ace_high calls' do
@@ -24,7 +31,7 @@ describe CardGame::Ordering do
         CardGame::Ordering.ace_high,
       ]
 
-      expect(orderings[0][ace] <=> orderings[1][ace]).to eq(0)
+      assert_equal 0, orderings[0][ace] <=> orderings[1][ace]
     end
 
     it 'does allow comparisons between different ace_low calls' do
@@ -33,7 +40,7 @@ describe CardGame::Ordering do
         CardGame::Ordering.ace_low,
       ]
 
-      expect(orderings[0][ace] <=> orderings[1][ace]).to eq(0)
+      assert_equal 0, orderings[0][ace] <=> orderings[1][ace]
     end
   end
 
@@ -44,9 +51,7 @@ describe CardGame::Ordering do
         CardGame::Ordering.suit(ace.suit),
       ]
 
-      expect {
-        orderings[0][joker] <=> orderings[1][joker]
-      }.to raise_error(/different orderings/)
+      assert_unorderable orderings, joker
     end
   end
 
@@ -57,9 +62,7 @@ describe CardGame::Ordering do
         CardGame::Ordering.match(ace),
       ]
 
-      expect {
-        orderings[0][joker] <=> orderings[1][joker]
-      }.to raise_error(/different orderings/)
+      assert_unorderable orderings, joker
     end
   end
 
@@ -74,9 +77,7 @@ describe CardGame::Ordering do
         ),
       ]
 
-      expect {
-        orderings[0][joker] <=> orderings[1][joker]
-      }.to raise_error(/different orderings/)
+      assert_unorderable orderings, joker
     end
   end
 end

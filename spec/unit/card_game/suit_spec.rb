@@ -1,21 +1,22 @@
-describe CardGame::Suit, aggregate_failures: true do
+require 'spec_helper'
+
+require 'card_game/suit'
+
+describe CardGame::Suit do
   describe 'aliases' do
     it 'points to the right things' do
-      expect(CardGame::Suit.♡).to eq(CardGame::Suit.hearts)
-      expect(CardGame::Suit.♥︎).to eq(CardGame::Suit.hearts)
-      expect(CardGame::Suit.♥️︎).to eq(CardGame::Suit.hearts)
-
-      expect(CardGame::Suit.♢).to eq(CardGame::Suit.diamonds)
-      expect(CardGame::Suit.♦︎).to eq(CardGame::Suit.diamonds)
-      expect(CardGame::Suit.♦️).to eq(CardGame::Suit.diamonds)
-
-      expect(CardGame::Suit.♧).to eq(CardGame::Suit.clubs)
-      expect(CardGame::Suit.♣︎).to eq(CardGame::Suit.clubs)
-      expect(CardGame::Suit.♣️).to eq(CardGame::Suit.clubs)
-
-      expect(CardGame::Suit.♤).to eq(CardGame::Suit.spades)
-      expect(CardGame::Suit.♠︎).to eq(CardGame::Suit.spades)
-      expect(CardGame::Suit.♠️︎).to eq(CardGame::Suit.spades)
+      assert_equal CardGame::Suit.hearts, CardGame::Suit.♡
+      assert_equal CardGame::Suit.hearts, CardGame::Suit.♥︎
+      assert_equal CardGame::Suit.hearts, CardGame::Suit.♥️︎
+      assert_equal CardGame::Suit.diamonds, CardGame::Suit.♢
+      assert_equal CardGame::Suit.diamonds, CardGame::Suit.♦︎
+      assert_equal CardGame::Suit.diamonds, CardGame::Suit.♦️
+      assert_equal CardGame::Suit.clubs, CardGame::Suit.♧
+      assert_equal CardGame::Suit.clubs, CardGame::Suit.♣︎
+      assert_equal CardGame::Suit.clubs, CardGame::Suit.♣️
+      assert_equal CardGame::Suit.spades, CardGame::Suit.♤
+      assert_equal CardGame::Suit.spades, CardGame::Suit.♠︎
+      assert_equal CardGame::Suit.spades, CardGame::Suit.♠️︎
     end
   end
 end

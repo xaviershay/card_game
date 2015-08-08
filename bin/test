@@ -1,0 +1,6 @@
+#!/bin/bash
+
+set -ex
+
+bin/test-unit
+bin/test-integration

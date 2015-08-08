@@ -1,51 +1,61 @@
+require 'spec_helper'
+
 require 'card_game/core_ext'
 
 describe CardGame::CoreExt, aggregate_failures: true do
   describe 'String' do
     it 'points to the right things' do
-      expect("A".hearts).to eq(CardGame::Card.from_string("AH"))
-      expect("A".♡).to eq(CardGame::Card.from_string("AH"))
-      expect("A".♥︎).to eq(CardGame::Card.from_string("AH"))
-      expect("A".♥️︎).to eq(CardGame::Card.from_string("AH"))
+      expected = CardGame::Card.from_string("AH")
+      assert_equal expected, "A".hearts
+      assert_equal expected, "A".♡
+      assert_equal expected, "A".♥︎
+      assert_equal expected, "A".♥️︎
 
-      expect("K".diamonds).to eq(CardGame::Card.from_string("KD"))
-      expect("K".♢).to eq(CardGame::Card.from_string("KD"))
-      expect("K".♦︎).to eq(CardGame::Card.from_string("KD"))
-      expect("K".♦️).to eq(CardGame::Card.from_string("KD"))
+      expected = CardGame::Card.from_string("KD")
+      assert_equal expected, "K".diamonds
+      assert_equal expected, "K".♢
+      assert_equal expected, "K".♦︎
+      assert_equal expected, "K".♦️
 
-      expect("Q".clubs).to eq(CardGame::Card.from_string("QC"))
-      expect("Q".♧).to eq(CardGame::Card.from_string("QC"))
-      expect("Q".♣︎).to eq(CardGame::Card.from_string("QC"))
-      expect("Q".♣️).to eq(CardGame::Card.from_string("QC"))
+      expected = CardGame::Card.from_string("QC")
+      assert_equal expected, "Q".clubs
+      assert_equal expected, "Q".♧
+      assert_equal expected, "Q".♣︎
+      assert_equal expected, "Q".♣️
 
-      expect("J".spades).to eq(CardGame::Card.from_string("JS"))
-      expect("J".♤).to eq(CardGame::Card.from_string("JS"))
-      expect("J".♠︎).to eq(CardGame::Card.from_string("JS"))
-      expect("J".♠️︎).to eq(CardGame::Card.from_string("JS"))
+      expected = CardGame::Card.from_string("JS")
+      assert_equal expected, "J".spades
+      assert_equal expected, "J".♤
+      assert_equal expected, "J".♠︎
+      assert_equal expected, "J".♠️︎
     end
   end
 
   describe 'Integer' do
     it 'points to the right things' do
-      expect(3.hearts).to eq(CardGame::Card.from_string("3H"))
-      expect(3.♡).to eq(CardGame::Card.from_string("3H"))
-      expect(3.♥︎).to eq(CardGame::Card.from_string("3H"))
-      expect(3.♥️︎).to eq(CardGame::Card.from_string("3H"))
+      expected = CardGame::Card.from_string("3H")
+      assert_equal expected, 3.hearts
+      assert_equal expected, 3.♡
+      assert_equal expected, 3.♥︎
+      assert_equal expected, 3.♥️︎
 
-      expect(5.diamonds).to eq(CardGame::Card.from_string("5D"))
-      expect(5.♢).to eq(CardGame::Card.from_string("5D"))
-      expect(5.♦︎).to eq(CardGame::Card.from_string("5D"))
-      expect(5.♦️).to eq(CardGame::Card.from_string("5D"))
+      expected = CardGame::Card.from_string("5D")
+      assert_equal expected, 5.diamonds
+      assert_equal expected, 5.♢
+      assert_equal expected, 5.♦︎
+      assert_equal expected, 5.♦️
 
-      expect(7.clubs).to eq(CardGame::Card.from_string("7C"))
-      expect(7.♧).to eq(CardGame::Card.from_string("7C"))
-      expect(7.♣︎).to eq(CardGame::Card.from_string("7C"))
-      expect(7.♣️).to eq(CardGame::Card.from_string("7C"))
+      expected = CardGame::Card.from_string("7C")
+      assert_equal expected, 7.clubs
+      assert_equal expected, 7.♧
+      assert_equal expected, 7.♣︎
+      assert_equal expected, 7.♣️
 
-      expect(10.spades).to eq(CardGame::Card.from_string("10S"))
-      expect(10.♤).to eq(CardGame::Card.from_string("10S"))
-      expect(10.♠︎).to eq(CardGame::Card.from_string("10S"))
-      expect(10.♠️︎).to eq(CardGame::Card.from_string("10S"))
+      expected = CardGame::Card.from_string("10S")
+      assert_equal expected, 10.spades
+      assert_equal expected, 10.♤
+      assert_equal expected, 10.♠︎
+      assert_equal expected, 10.♠️︎
     end
   end
 end

@@ -1,1 +1,3 @@
-require 'rspec'
+require 'xspec'
+
+extend XSpec.dsl

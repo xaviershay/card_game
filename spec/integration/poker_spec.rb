@@ -2,6 +2,7 @@ require 'spec_helper'
 
 require 'csv'
 
+require 'card_game/suit'
 require 'card_game/poker'
 
 describe CardGame::Poker do
@@ -9,10 +10,10 @@ describe CardGame::Poker do
     path = File.expand_path("../data/poker-hand-training-true.data.txt",
                               __FILE__)
     suits = [
-      CardGame::Hearts,
-      CardGame::Spades,
-      CardGame::Diamonds,
-      CardGame::Clubs,
+      CardGame::Suit.hearts,
+      CardGame::Suit.spades,
+      CardGame::Suit.diamonds,
+      CardGame::Suit.clubs,
     ]
 
     CSV.foreach(path) do |row|
@@ -34,7 +35,6 @@ describe CardGame::Poker do
       actual = CardGame::Poker.classify(cards).rank
       if actual != expected
         fail "Expected #{cards} pattern to be #{expected}, got #{actual}"
-
       end
     end
   end

@@ -2,7 +2,7 @@ require 'spec_helper'
 
 require 'card_game/five_hundred'
 
-describe CardGame::FiveHundred, aggregate_failures: false do
+describe CardGame::FiveHundred do
   describe '.winning_card' do
     def assert_winner(winner, hand_string, trump = CardGame::Suit.none)
       actual = CardGame::FiveHundred.winning_card(CardGame::Trick.new(
@@ -10,7 +10,7 @@ describe CardGame::FiveHundred, aggregate_failures: false do
         trump: trump,
       ))
 
-      expect(actual).to eq(CardGame::Card.from_string(winner))
+      assert_equal CardGame::Card.from_string(winner), actual
     end
 
     it 'picks highest card' do
@@ -56,41 +56,38 @@ describe CardGame::FiveHundred, aggregate_failures: false do
     end
   end
 
-  specify 'generating a three player deck' do
+  def assert_deck_with_single_joker(deck, size)
+    assert_equal size, deck.size
+    assert deck.all? {|card| card.is_a?(CardGame::Card) }
+    assert_equal 1, deck.count {|card| card.rank == CardGame::Rank.joker }
+  end
+
+  it 'generating a three player deck' do
     deck = CardGame::FiveHundred.deck(players: 3)
 
-    expect(deck.size).to eq(33)
-    expect(deck.all? {|card| card.is_a?(CardGame::Card) }).to eq(true)
-    expect(deck.count {|card| card.rank == CardGame::Rank.joker }).to eq(1)
-      eq(true)
+    assert_deck_with_single_joker(deck, 33)
   end
 
-  specify 'generating a four player deck' do
+  it 'generating a four player deck' do
     deck = CardGame::FiveHundred.deck
 
-    expect(deck.size).to eq(43)
-    expect(deck.all? {|card| card.is_a?(CardGame::Card) }).to eq(true)
-    expect(deck.count {|card| card.rank == CardGame::Rank.joker }).to eq(1)
-    expect(deck.none? {|card| card.rank == CardGame::Rank.numbered(2) }).to \
-      eq(true)
+    assert_deck_with_single_joker(deck, 43)
+
+    assert deck.none? {|card| card.rank == CardGame::Rank.numbered(2) }
   end
 
-  specify 'generating a five player deck' do
+  it 'generating a five player deck' do
     deck = CardGame::FiveHundred.deck(players: 5)
 
-    expect(deck.size).to eq(53)
-    expect(deck.all? {|card| card.is_a?(CardGame::Card) }).to eq(true)
-    expect(deck.count {|card| card.rank == CardGame::Rank.joker }).to eq(1)
-      eq(true)
+    assert_deck_with_single_joker(deck, 53)
   end
 
-  specify 'generating a six player deck' do
+  it 'generating a six player deck' do
     deck = CardGame::FiveHundred.deck(players: 6)
 
-    expect(deck.size).to eq(63)
-    expect(deck.all? {|card| card.is_a?(CardGame::Card) }).to eq(true)
-    expect(deck.count {|card| card.rank == CardGame::Rank.joker }).to eq(1)
-    expect(deck.any? {|card| card.rank == CardGame::Rank.numbered(12) }).to \
-      eq(true)
+    assert_deck_with_single_joker(deck, 63)
+    assert_equal 2, deck.count {|card|
+      card.rank == CardGame::Rank.numbered(13)
+    }
   end
 end
