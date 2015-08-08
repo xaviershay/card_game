@@ -66,7 +66,7 @@ module CardGame
       "<#{self.class.name} #{keyvalues}>"
     end
 
-    alias_method :to_s, :inspect
+    alias_method :inspect, :to_s
 
     # @private
     def equality_key
