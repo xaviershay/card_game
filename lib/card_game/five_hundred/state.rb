@@ -46,14 +46,14 @@ module CardGame
       end
 
       def setup_actors(actors)
-        merge(actors: actors)
+        merge(
+          actors: actors,
+        )
       end
 
       def adjust_score(team, points)
         team.inject(self) do |s, player|
-          s.merge(
-            scores: s.fetch(:scores, Hamster::Hash[]).put(player) {|n| n.to_i + points }
-          )
+          s.update_in(:scores, player) {|n| n.to_i + points }
         end
       end
 
@@ -66,9 +66,7 @@ module CardGame
       end
 
       def won_trick(player)
-        merge(
-          won: fetch(:won, Hamster::Hash[]).put(player) {|p| p.to_i + 1 }
-        )
+        update_in(:won, player) {|n| n.to_i + 1 }
       end
 
       def clear_tricks
@@ -77,7 +75,7 @@ module CardGame
 
       def deal(hands:, kitty:)
         merge(
-          hands: hands,
+          hands: Hamster::Hash[hands],
           kitty: kitty
         )
       end
@@ -115,30 +113,23 @@ module CardGame
       end
 
       def add_card_to_trick(card)
-        merge(
-          trick: trick.add(card),
-          hands: hands.merge(
-            priority => priority_hand - [card]
-          )
-        )
+        self
+          .put(:trick) {|t| t.add(card) }
+          .update_in(:hands, priority) { priority_hand - [card] }
       end
 
       def move_cards_to_kitty(cards)
         kitty = priority_hand & cards
 
-        merge(
-          kitty: kitty,
-          hands: hands.merge(
-            priority => priority_hand - kitty
-          )
-        )
+        self
+          .update_in(:hands, priority) {|h| h - kitty }
+          .put(:kitty, kitty)
       end
 
       def move_kitty_to_hand
-        merge(
-          hands: hands.merge(priority => priority_hand + kitty),
-          kitty: []
-        )
+        self
+          .update_in(:hands, priority) {|h| h + kitty }
+          .put(:kitty, [])
       end
 
       def new_trick
@@ -161,8 +152,16 @@ module CardGame
         self.class.new @data.merge(*args)
       end
 
+      def update_in(*args, &block)
+        self.class.new @data.update_in(*args, &block)
+      end
+
       def fetch(*args)
         @data.fetch(*args)
+      end
+
+      def put(*args, &block)
+        self.class.new @data.put(*args, &block)
       end
 
       def delete(*args)
