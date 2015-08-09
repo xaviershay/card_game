@@ -1,6 +1,7 @@
 require 'card_game/card'
 require 'card_game/ordering'
 require 'card_game/trick'
+require 'card_game/game'
 
 require 'card_game/five_hundred/state'
 
@@ -90,19 +91,17 @@ module CardGame
     # @private
     ALL_RANKS = DECK_SPECIFICATION.fetch(6)[Color.red]
 
-    def self.play(players: )
-      Game.new(players: players)
+    def self.play(players: 4)
+      # TODO: Use players
+      state = State.new
+
+      Game.new(Phase::Setup, state)
     end
 
     module Action
       # TODO: This is actual CoreBid
-      class Core
-        include ValueObject
+      class Core < Game::Action
         include Comparable
-
-        values do
-          attribute :actor
-        end
 
         def <=>(other)
           key <=> other.key
@@ -174,13 +173,7 @@ module CardGame
       end
     end
 
-    class Player
-      include ValueObject
-
-      values do
-        attribute :position, Integer
-      end
-
+    class Player < Game::Player
       def bid(n, suit)
         Action::Bid.build(self, n, suit)
       end
@@ -196,39 +189,10 @@ module CardGame
       def kitty(cards)
         Action::Kitty.new(actor: self, cards: cards)
       end
-
-      def name
-        "Player"
-      end
-
-      def to_s
-        "<#{name} %i>" % position
-      end
-      alias_method :inspect, :to_s
-
-      def pretty_print(pp)
-        pp.text(to_s)
-      end
     end
 
     module Phase
-      class Abstract
-        attr_reader :state
-
-        def self.enter(state); new(state).enter end
-        def self.exit(state); new(state).exit end
-        def self.apply(state, action); new(state).apply(action) end
-        def self.transition(state); new(state).transition end
-
-        def initialize(state)
-          @state = state
-        end
-
-        def enter; state end
-        def exit; state end
-        def apply(action); state end
-        def transition; end
-      end
+      Abstract = CardGame::Game::Phase
 
       class Setup < Abstract
         def enter
@@ -390,46 +354,6 @@ module CardGame
       end
 
       class Completed < Abstract
-      end
-    end
-
-    # Phases operate on state
-    # Game passes state and action to phases and manages transitions
-    # State is immutable
-    class Game
-      attr_accessor :state, :phase
-
-      def initialize
-        @phase = Phase::Setup
-        @state = @phase.enter(State.new)
-
-        transition
-      end
-
-      def apply(action)
-        self.state = phase.apply(state, action)
-
-        transition
-      end
-
-      def transition
-        new_phase = phase.transition(state)
-
-        if new_phase
-          self.state = phase.exit(state)
-          self.phase = new_phase
-          self.state = phase.enter(state)
-
-          transition
-        end
-      end
-
-      def actors
-        hands.keys
-      end
-
-      def hands
-        state.hands
       end
     end
   end
