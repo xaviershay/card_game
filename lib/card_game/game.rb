@@ -1,5 +1,7 @@
 module CardGame
   class Game
+    class StateError < RuntimeError; end
+
     attr_accessor :state, :phase
 
     def initialize(phase, state)

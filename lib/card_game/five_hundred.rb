@@ -209,18 +209,13 @@ module CardGame
 
       class NewRound < Abstract
         def enter
-          deck = FiveHundred.deck(players: state.players).shuffle
+          deck = FiveHundred.deck(players: state.players)
 
           state
-            .deal(
-              hands: state.actors.map {|actor|
-                [actor, deck.shift(10)]
-              }.to_h,
-              kitty: deck.shift(3),
-            )
+            .deal(deck)
             .advance_dealer
             .give_priority(state.dealer)
-            .reset_bid(Action::Pass.new({}))
+            .place_bid(Action::Pass.new({}))
         end
 
         def transition
@@ -245,7 +240,7 @@ module CardGame
           super
 
           if action > state.bid
-            state.advance(bid: action)
+            state.advance.place_bid(action)
           else
             state.advance
           end

@@ -28,3 +28,7 @@ extend XSpec.dsl(
     include AggregateFailures
   }
 )
+
+require 'card_game'
+
+CG = CardGame
