@@ -190,9 +190,6 @@ describe CardGame::FiveHundred do
 
       it 'deletes the current trick' do
         s = state(%i(a b))
-          .place_bid(
-            CG::FiveHundred::Action::Bid.build(nil, 6, CG::Suit.hearts)
-          )
           .new_trick
           .clear_tricks
 
@@ -264,15 +261,12 @@ describe CardGame::FiveHundred do
         s = state(%i(a b c d))
           .deal(fake_deck)
           .give_priority(:c)
-          .place_bid( # TODO: Use proper non-action object here
-            CG::FiveHundred::Action::Bid.build(nil, 6, CG::Suit.hearts)
-          )
           .new_trick
 
         card = s.priority_hand[0]
         s = s.add_card_to_trick(card)
 
-        assert_equal [card], s.trick.cards
+        assert_equal [card], s.trick.to_a
         assert !s.priority_hand.include?(card),
           "card was not removed from hand"
       end
@@ -281,9 +275,6 @@ describe CardGame::FiveHundred do
         s = state(%i(a b c d))
           .deal(fake_deck)
           .give_priority(:c)
-          .place_bid( # TODO: Use proper non-action object here
-            CG::FiveHundred::Action::Bid.build(nil, 6, CG::Suit.hearts)
-          )
           .new_trick
 
         card = s.hands[:a][0]

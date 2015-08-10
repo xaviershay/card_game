@@ -1,8 +1,6 @@
 require 'hamster/hash'
 require 'hamster/set'
-
-# TODO: Probably possible to remove this dependency
-require 'card_game/trick'
+require 'hamster/deque'
 
 require 'card_game/game'
 
@@ -19,8 +17,8 @@ module CardGame
     # While +Player+ and +Card+ classes are used in parameter documentation for
     # clarity, they are treated as opaque objects. Any object will work. +Set+,
     # +Array+ and +Hash+ are used to express a role. The actual objects
-    # returned may not be Ruby primitives. Be sure to call `#to_a`, '#to_h` and
-    # friends on returned values if you require this.
+    # returned may not be Ruby primitives, though only methods matching those
+    # from primitives are considered a public API.
     class State
       # @private
       StateError = CardGame::Game::StateError
@@ -39,6 +37,8 @@ module CardGame
 
       # @macro state_reader
       #   @!method $1
+      #   @raise [CardGame::Game::StateError] when value is not present or
+      #                                       available in the current state.
       # @private
       def self.state_reader(attr)
         define_method(attr) { fetch(attr) }
@@ -66,7 +66,7 @@ module CardGame
       state_reader :tricks
 
       # Current trick
-      # @return [Trick]
+      # @return [Array<Card>]
       state_reader :trick
 
       # Cards in hand for each player.
@@ -218,7 +218,7 @@ module CardGame
         end
 
         self
-          .put(:trick) {|t| t.add(card) }
+          .put(:trick) {|t| t.push(card) }
           .update_in(:hands, priority) {|h| h - [card] }
       end
 
@@ -254,9 +254,7 @@ module CardGame
       #
       # @return [State]
       def new_trick
-        merge(
-          trick: CardGame::Trick.build([], bid.suit)
-        )
+        put(:trick, Hamster::Deque.empty)
       end
 
       # @!endgroup Transitions

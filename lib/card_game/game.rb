@@ -1,8 +1,28 @@
 module CardGame
+  # Life-cycle manager for a game of cards. It isn't particular about which
+  # game. Given an initial *state* and *phase*, it provides a workflow for
+  # modify the state via *actions*. Virtually all card games can be modeled
+  # with this abstraction. See specific implementations (Poker, Five Hundred)
+  # for examples.
   class Game
+    # Raised when an invalid game state is encountered, either when trying to
+    # read part of the state that is not available, or when transitioning the
+    # state.
     class StateError < RuntimeError; end
 
-    attr_accessor :state, :phase
+    # Current game state. At its simplest this could be a +Hash+, but most
+    # games will want to implement a richer state object providing common
+    # transformations.
+    #
+    # @attribute [r] state
+    # @return [Object]
+    attr_reader :state
+
+    # Current game phase. Determines what actions are allowed.
+    #
+    # @return [Phase]
+    # @attribute [r] phase
+    attr_reader :phase
 
     def initialize(phase, state)
       @phase = phase
@@ -11,11 +31,25 @@ module CardGame
       transition
     end
 
+    # Apply the action to the state using the current phase to produce a new
+    # state, then transition to a new phase if appropriate.
+    #
+    # All legal actions must cause the new state to differ from the old one.
+    # This restriction is precautionary: a use case may be found where this
+    # should be allowed, but I haven't found it yet.
+    #
+    # @raise [StateError] if the action was not valid for the current state.
+    # @raise [StateError] if applying the action did not cause the state to
+    #                     change.
     def apply(action)
       self.state = phase.apply(state, action)
 
       transition
     end
+
+    protected
+
+    attr_writer :state, :phase
 
     def transition
       new_phase = phase.transition(state)
