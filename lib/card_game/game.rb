@@ -63,22 +63,95 @@ module CardGame
       end
     end
 
+    # Abstract parent class for game phases. Phases need not subclass, so long
+    # as they provide the same class-level interface.
+    #
+    # See {Game} for an overview of how phases interact with other game
+    # objects.
+    #
+    # @abstract Subclasses likely want to override at least {#enter} or
+    #   {#apply}.
     class Phase
-      attr_reader :state
-
+      # Called each time the phase is transitioned into. Wraps the state in a
+      # new instance and calls {#enter}.
+      #
+      # @param state [Object]
+      # @return [Object] New state. May be the same as old.
       def self.enter(state); new(state).enter end
+
+      # Called each time the phase is transitioned out of. Wraps the state in a
+      # new instance and calls {#exit}.
+      #
+      # @param state [Object]
+      # @return [Object] New state. May be the same as old.
       def self.exit(state); new(state).exit end
+
+      # Called when this phase is current. The phase is expected to return a
+      # new state by applying the action to the provided state. Wraps the state
+      # in a new instance and calls {#apply}.
+      #
+      # @param state [Object]
+      # @param action [Action]
+      # @return [Object] New state from applying the action. Must not be the
+      #                  same as the old state.
       def self.apply(state, action); new(state).apply(action) end
+
+      # Called when this phase is current and the state has changed. Should
+      # return +nil+ to remain active, or another {Phase} to transition to it.
+      # Wraps the state in a new instance and calls {#transition}.
+      #
+      # @param state [Object]
+      # @return [Phase]
       def self.transition(state); new(state).transition end
+
+      # @!group Protected Instance Methods
+
+      # Returns the state unchanged. Subclasses may override this behaviour.
+      #
+      # @see .enter
+      # @return [Object] New state. May be the same as old.
+      def enter; state end
+
+      # Returns the state unchanged. Subclasses may override this behaviour.
+      #
+      # @see .exit
+      # @return [Object] New state. May be the same as old.
+      def exit; state end
+
+      # Always raises. Since actions must transform the state, no default
+      # behaviour is reasonable. Subclasses do not need to override if they
+      # immediately transition to a new phase (i.e. the {#transition} method
+      # never returns +nil+), since this will not leave an opportunity for an
+      # action to be applied.
+      #
+      # @see .apply
+      # @param action [Action]
+      # @return [Object] New state from applying the action. Must not be the
+      #                  same as the old state.
+      def apply(action)
+        raise NotImplementedError
+      end
+
+      # Returns +nil+, indicating that this phase should remain active.
+      # Subclasses may override this behaviour.
+      #
+      # Returning +self.class+ is treated as changing to a new phase: it will
+      # cause {.exit} and {.enter} to be called.
+      #
+      # @see .transition
+      # @return [Phase]
+      def transition; end
+
+      # @!endgroup Protected Instance Methods
+
+      protected
+
+      attr_reader :state
 
       def initialize(state)
         @state = state
       end
 
-      def enter; state end
-      def exit; state end
-      def apply(action); state end
-      def transition; end
     end
 
     class Player
