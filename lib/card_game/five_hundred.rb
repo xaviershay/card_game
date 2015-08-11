@@ -313,26 +313,20 @@ module CardGame
       class Scoring < Abstract
         def enter
           bidding_team = state.team_for(state.bid.actor)
-          tricks_won = bidding_team.map do |actor|
-            state.tricks.fetch(actor)
-          end.reduce(:+)
+          tricks_won = state.tricks_won_by(bidding_team)
 
-          new_state = if tricks_won > state.bid.number
-            state
-              .adjust_score(bidding_team, state.bid.score)
+          mod = if tricks_won >= state.bid.number
+            1
           else
-            state
-              .adjust_score(bidding_team, -state.bid.score)
+            -1
           end
 
-          opposing_team = state.players - bidding_team
+          new_state = state.adjust_score(bidding_team, state.bid.score * mod)
 
-          tricks_won = opposing_team.map do |actor|
-            new_state.tricks.fetch(actor)
-          end.reduce(:+)
+          opposing_team = new_state.players - bidding_team
+          tricks_won = new_state.tricks_won_by(opposing_team)
 
-          new_state
-            .adjust_score(opposing_team, tricks_won * 10)
+          new_state.adjust_score(opposing_team, tricks_won * 10)
         end
 
         def exit

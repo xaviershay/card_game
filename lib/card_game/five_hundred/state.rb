@@ -90,7 +90,7 @@ module CardGame
         hands.fetch(priority)
       end
 
-      # Return the current team for a given player. This may change each round.
+      # Current team for a given player. This may change each round.
       #
       # @param player [Player]
       # @return [Set<Player>]
@@ -100,6 +100,16 @@ module CardGame
         end
 
         Hamster::Set[player, player_relative_to(player, 2)]
+      end
+
+      # Number of tricks won by the team in the current round.
+      #
+      # @param team [Set<Player>]
+      # @return [Integer]
+      def tricks_won_by(team)
+        team.map do |actor|
+          tricks.fetch(actor)
+        end.reduce(:+)
       end
 
       # Return a player by index from the player with priority. An index of 0
