@@ -91,28 +91,28 @@ describe CardGame::FiveHundred do
     }
   end
 
-#   it 'game' do
-#     game = CardGame::FiveHundred.play(players: 4)
-# 
-#     players = game.state.actors
-# 
-#     game.apply players[0].bid(6, CardGame::Suit.hearts)
-#     game.apply players[1].pass
-#     game.apply players[2].bid(7, CardGame::Suit.hearts)
-#     game.apply players[3].pass
-#     game.apply players[0].pass
-#     game.apply players[1].pass
-# 
-#     game.apply players[2].kitty(game.state.hands.fetch(players[2]).take(3))
-# 
-#     (0..9).each do
-#       i = players.index(game.state.priority)
-#       game.apply players[(i+0) % 4].play(game.state.hands.fetch(players[(i+0) % 4])[0])
-#       game.apply players[(i+1) % 4].play(game.state.hands.fetch(players[(i+1) % 4])[0])
-#       game.apply players[(i+2) % 4].play(game.state.hands.fetch(players[(i+2) % 4])[0])
-#       game.apply players[(i+3) % 4].play(game.state.hands.fetch(players[(i+3) % 4])[0])
-#     end
-#   end
+  it 'game' do
+    game = CardGame::FiveHundred.play(players: 4)
+
+    players = game.state.players
+
+    game.apply players[0].bid(6, CardGame::Suit.hearts)
+    game.apply players[1].pass
+    game.apply players[2].bid(7, CardGame::Suit.hearts)
+    game.apply players[3].pass
+    game.apply players[0].pass
+    game.apply players[1].pass
+
+    game.apply players[2].kitty(game.state.hands.fetch(players[2]).take(3))
+
+    (0..9).each do
+      i = players.index(game.state.priority)
+      game.apply players[(i+0) % 4].play(game.state.hands.fetch(players[(i+0) % 4])[0])
+      game.apply players[(i+1) % 4].play(game.state.hands.fetch(players[(i+1) % 4])[0])
+      game.apply players[(i+2) % 4].play(game.state.hands.fetch(players[(i+2) % 4])[0])
+      game.apply players[(i+3) % 4].play(game.state.hands.fetch(players[(i+3) % 4])[0])
+    end
+  end
 
   describe 'state' do
     def state(players)

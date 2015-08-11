@@ -92,10 +92,7 @@ module CardGame
     ALL_RANKS = DECK_SPECIFICATION.fetch(6)[Color.red]
 
     def self.play(players: 4)
-      # TODO: Use players
-      state = State.new
-
-      Game.new(Phase::Setup, state)
+      Game.new(Phase::Setup, players)
     end
 
     module Action
@@ -196,10 +193,10 @@ module CardGame
 
       class Setup < Abstract
         def enter
-          actors = (1..4).map {|x| Player.new(position: x) }
-          state
-            .setup_actors(actors)
-            .give_deal(actors.first) # TODO: sample, store seed in state
+          players = (1..state).map {|x| Player.new(position: x) }
+          
+          State.initial(players)
+            .give_deal(players.first) # TODO: sample, store seed in state
         end
 
         def transition
@@ -209,7 +206,7 @@ module CardGame
 
       class NewRound < Abstract
         def enter
-          deck = FiveHundred.deck(players: state.players)
+          deck = FiveHundred.deck(players: state.players.size)
 
           state
             .deal(deck)
@@ -277,10 +274,13 @@ module CardGame
         end
 
         def exit
-          card = FiveHundred.winning_card(state.trick)
-          i = state.trick.cards.index(card)
+          # TODO: Figure out a way to clean this up
+          card = FiveHundred.winning_card(
+            CardGame::Trick.build(state.trick.to_a, state.bid.suit)
+          )
+          i = state.trick.to_a.index(card)
 
-          winner = state.player_relative_to_priority(i)
+          winner = state.player_relative_to(state.priority, i)
 
           state
             .won_trick(winner)
@@ -314,7 +314,7 @@ module CardGame
         def enter
           bidding_team = state.team_for(state.bid.actor)
           tricks_won = bidding_team.map do |actor|
-            state.won.fetch(actor, 0)
+            state.tricks.fetch(actor)
           end.reduce(:+)
 
           new_state = if tricks_won > state.bid.number
@@ -325,10 +325,10 @@ module CardGame
               .adjust_score(bidding_team, -state.bid.score)
           end
 
-          opposing_team = state.actors - bidding_team
+          opposing_team = state.players - bidding_team
 
           tricks_won = opposing_team.map do |actor|
-            new_state.won.fetch(actor, 0)
+            new_state.tricks.fetch(actor)
           end.reduce(:+)
 
           new_state

@@ -92,7 +92,7 @@ module CardGame
 
       # Return the current team for a given player. This may change each round.
       #
-      # @param player Player
+      # @param player [Player]
       # @return [Set<Player>]
       def team_for(player)
         if players.size != 4
@@ -100,6 +100,18 @@ module CardGame
         end
 
         Hamster::Set[player, player_relative_to(player, 2)]
+      end
+
+      # Return a player by index from the player with priority. An index of 0
+      # will return the priority player, an index of 1 the player to their
+      # left, and so on.
+      #
+      # @param player [Player]
+      # @param index [Integer]
+      # @return [Player]
+      def player_relative_to(player, index)
+        current = players.index(player)
+        players.fetch((current + index) % players.size)
       end
       
       # @!endgroup Readers
@@ -288,11 +300,6 @@ module CardGame
 
       def delete(*args)
         self.class.new @data.delete(*args)
-      end
-
-      def player_relative_to(player, n)
-        current = players.index(player)
-        players.fetch((current + n) % players.size)
       end
     end
   end
