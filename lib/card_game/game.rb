@@ -129,7 +129,8 @@ module CardGame
       # @return [Object] New state from applying the action. Must not be the
       #                  same as the old state.
       def apply(action)
-        raise NotImplementedError
+        # TODO: How to avoid calls to super, so can raise here.
+#         raise NotImplementedError
       end
 
       # Returns +nil+, indicating that this phase should remain active.

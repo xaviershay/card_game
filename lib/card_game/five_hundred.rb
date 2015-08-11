@@ -92,7 +92,9 @@ module CardGame
     ALL_RANKS = DECK_SPECIFICATION.fetch(6)[Color.red]
 
     def self.play(players: 4)
-      Game.new(Phase::Setup, players)
+      players = (1..players).map {|x| Player.new(position: x) }
+
+      Game.new(Phase::Setup, State.initial(players))
     end
 
     module Action
@@ -193,10 +195,8 @@ module CardGame
 
       class Setup < Abstract
         def enter
-          players = (1..state).map {|x| Player.new(position: x) }
-          
-          State.initial(players)
-            .give_deal(players.first) # TODO: sample, store seed in state
+          state
+            .give_deal(state.players.first) # TODO: sample, store seed in state
         end
 
         def transition
