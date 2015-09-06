@@ -91,10 +91,15 @@ describe CardGame::FiveHundred do
     }
   end
 
-  it 'game' do
+  it 'game play through' do
     game = CardGame::FiveHundred.play(players: 4)
 
     players = game.state.players
+    hand = -> player { game.state.hands.fetch(player) }
+
+    assert players.all? {|player|
+      hand.(player).size == 10
+    }
 
     game.apply players[0].bid(6, CardGame::Suit.hearts)
     game.apply players[1].pass
@@ -103,15 +108,21 @@ describe CardGame::FiveHundred do
     game.apply players[0].pass
     game.apply players[1].pass
 
-    game.apply players[2].kitty(game.state.hands.fetch(players[2]).take(3))
+    assert_equal players[2], game.state.priority
+    assert_equal 13, game.state.priority_hand.size
+
+    game.apply players[2].kitty(hand.(players[2]).take(3))
 
     (0..9).each do
       i = players.index(game.state.priority)
-      game.apply players[(i+0) % 4].play(game.state.hands.fetch(players[(i+0) % 4])[0])
-      game.apply players[(i+1) % 4].play(game.state.hands.fetch(players[(i+1) % 4])[0])
-      game.apply players[(i+2) % 4].play(game.state.hands.fetch(players[(i+2) % 4])[0])
-      game.apply players[(i+3) % 4].play(game.state.hands.fetch(players[(i+3) % 4])[0])
+      game.apply players[(i+0) % 4].play(hand.(players[(i+0) % 4])[0])
+      game.apply players[(i+1) % 4].play(hand.(players[(i+1) % 4])[0])
+      game.apply players[(i+2) % 4].play(hand.(players[(i+2) % 4])[0])
+      game.apply players[(i+3) % 4].play(hand.(players[(i+3) % 4])[0])
     end
+
+    assert game.state.scores.values.reduce(:+) != 0
+    assert_equal CardGame::FiveHundred::Phase::Bidding, game.phase
   end
 
   describe 'state' do

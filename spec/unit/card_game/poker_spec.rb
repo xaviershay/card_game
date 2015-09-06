@@ -151,7 +151,7 @@ describe CardGame::Poker, aggregate_failures: true do
     assert deck.none? {|card| card.rank == CardGame::Rank.joker }
   end
 
-  it 'game' do
+  it 'game play through' do
     game = CardGame::Poker.texas_holdem(players: 2, buy_in: 100)
     players = game.state.actors
 

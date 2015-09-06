@@ -43,6 +43,7 @@ module CardGame
     #                     change.
     def apply(action)
       self.state = phase.apply(state, action)
+      # TODO: Fail if state hasn't changed.
 
       transition
     end
@@ -176,6 +177,11 @@ module CardGame
       end
     end
 
+    # An action can be applied to the game state. This is a convenience
+    # abstract base class, though any objects can be used.
+    #
+    # @attr_reader actor [Object] object identifying who initiated the action.
+    #                             By convention these are {#Player} objects.
     class Action
       include ValueObject
 
@@ -183,6 +189,10 @@ module CardGame
         attribute :actor
       end
 
+      # Convenience method for construction a new action.
+      #
+      # @param actor [Object]
+      # @return [Action]
       def self.build(actor)
         new(actor: actor)
       end

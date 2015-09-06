@@ -29,6 +29,9 @@ extend XSpec.dsl(
   }
 )
 
+require 'simplecov'
+SimpleCov.start
+
 require 'card_game'
 
 CG = CardGame

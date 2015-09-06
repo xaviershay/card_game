@@ -32,10 +32,15 @@ module CardGame
       Deck.deck
     end
 
+    # Experimental and incomplete model of Texas Hold 'em. Don't expect it to
+    # work.
+    #
+    # @api private
     def self.texas_holdem(players:, buy_in: 100)
       Game.new(Phase::Setup, State.default(players: players, buy_in: buy_in))
     end
 
+    # @private
     module Phase
       class Setup < Game::Phase
         def enter
@@ -146,6 +151,7 @@ module CardGame
       end
     end
 
+    # @api private
     class Player < Game::Player
       def fold
         Action::Fold.build(self)
@@ -160,6 +166,7 @@ module CardGame
       end
     end
 
+    # @api private
     module Action
       class Fold < Game::Action
       end

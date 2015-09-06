@@ -91,15 +91,26 @@ module CardGame
     # @private
     ALL_RANKS = DECK_SPECIFICATION.fetch(6)[Color.red]
 
+    # State machine modeling the rules of Five Hundred. Create actions using
+    # builder methods on the player objects stored in
+    # {CardGame::FiveHundred::State}. Only actions from the priority player
+    # are valid.
+    #
+    # Only "standard" bids are implemented (e.g. no Misère).
+    #
+    # @param players [Integer] the number of players.
+    # @return [CardGame::Game]
+    # @see State#players
     def self.play(players: 4)
       players = (1..players).map {|x| Player.new(position: x) }
 
       Game.new(Phase::Setup, State.initial(players))
     end
 
+    # All actions that can be applied for a game of Five Hundred.
     module Action
-      # TODO: This is actual CoreBid
-      class Core < Game::Action
+      # @private
+      class CoreBid < Game::Action
         include Comparable
 
         def <=>(other)
@@ -107,20 +118,33 @@ module CardGame
         end
       end
 
-      class Bid < Core
+      # A bid action. Currently does not handle mezzaire.
+      #
+      # @attr_reader number [Integer] number of tricks to win.
+      # @attr_reader suit   [Suit] trump suit.
+      class Bid < CoreBid
         values do
           attribute :number, Integer
           attribute :suit, Suit
         end
 
+        # Construct a new bid.
+        #
+        # @param actor [Player]
+        # @param number [Integer]
+        # @param suit [Suit]
         def self.build(actor, number, suit)
           new(actor: actor, number: number, suit: suit)
         end
 
+        # @private
         def key
-          [number]
+          [score]
         end
 
+        # Points that would be earned by this bid.
+        #
+        # @return [Integer]
         def score
           suit_score = [
             Suit.spades,
@@ -133,63 +157,76 @@ module CardGame
           (number - 6) * 100 + suit_score
         end
 
+        # @return [String]
         def to_s
           "<Bid %s %i%s>" % [actor, number, suit]
         end
         alias_method :inspect, :to_s
 
+        # @return [String]
         def pretty_print(pp)
           pp.text(to_s)
         end
       end
 
-      class Pass < Core
-        def self.build(actor)
-          new(actor: actor)
-        end
-
+      # Pass priority without placing a bid. Only valid during bidding phase.
+      class Pass < CoreBid
+        # @private
         def key
           [0]
         end
       end
 
-      class Play
-        include ValueObject
-
+      # Play a card into the current trick. Only valid during round phase.
+      #
+      # @attr_reader card [Card] card from player's hand.
+      class Play < Game::Action
         values do
-          attribute :actor
           attribute :card, Card
         end
       end
 
-      class Kitty
-        include ValueObject
-
+      # Place cards back into the kitty. Only valid during kitty phase.
+      #
+      # @attr_reader cards [Set<Card>] cards from player's hand.
+      class Kitty < Game::Action
         values do
-          attribute :actor
           attribute :cards, [Card]
         end
       end
     end
 
+    # An individual player in the game. Builder methods construct
+    # {CardGame::Game::Action} subclasses suitable for passing to
+    # {CardGame::Game#apply}.
     class Player < Game::Player
+      # @param n [Integer] number of tricks to win
+      # @param suit [Suit] trump suit
+      # @return [Action::Bid]
       def bid(n, suit)
         Action::Bid.build(self, n, suit)
       end
 
+      # @return [Action::Pass]
       def pass
         Action::Pass.build(self)
       end
 
+      # @param card [Card] card from player's hand.
+      # @return [Action::Play]
       def play(card)
         Action::Play.new(actor: self, card: card)
       end
 
+      # @param cards [Set<Card>] cards from the player's hand to place back
+      #                          into kitty.
+      # @return [Action::Kitty]
       def kitty(cards)
         Action::Kitty.new(actor: self, cards: cards)
       end
     end
 
+    # @private
     module Phase
       Abstract = CardGame::Game::Phase
 

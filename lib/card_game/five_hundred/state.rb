@@ -45,7 +45,7 @@ module CardGame
       end
 
       # All players in the game.
-      # @return [Array]
+      # @return [Array<Player>]
       state_reader :players
 
       # The player whose turn it is to act.
