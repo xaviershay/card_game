@@ -5,6 +5,8 @@ module CardGame
   #
   # @example
   #     class Person
+  #       include ValueObject
+  #
   #       values do
   #         attribute :name, String
   #         attribute :age, Integer
