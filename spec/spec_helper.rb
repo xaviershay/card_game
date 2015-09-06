@@ -28,3 +28,10 @@ extend XSpec.dsl(
     include AggregateFailures
   }
 )
+
+require 'simplecov'
+SimpleCov.start
+
+require 'card_game'
+
+CG = CardGame

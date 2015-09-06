@@ -1,6 +1,16 @@
 GEM
   remote: https://rubygems.org/
   specs:
+    atomic (1.1.99)
+    docile (1.1.5)
+    hamster (1.0.0)
+      atomic (~> 1.1)
+    json (1.8.3)
+    simplecov (0.10.0)
+      docile (~> 1.1.0)
+      json (~> 1.8)
+      simplecov-html (~> 0.10.0)
+    simplecov-html (0.10.0)
     xspec (0.2.0)
     yard (0.8.7.6)
 
@@ -8,8 +18,10 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  hamster
+  simplecov
   xspec
   yard
 
 BUNDLED WITH
-   1.10.5
+   1.10.6

@@ -15,6 +15,14 @@ module CardGame
       attribute :trump, Suit
     end
 
+    def add(card)
+      copy(cards: cards + [card])
+    end
+
+    def size
+      cards.size
+    end
+
     # Create a new trick.
     #
     # @param cards [Array<Card>]

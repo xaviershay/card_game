@@ -5,6 +5,8 @@ module CardGame
   #
   # @example
   #     class Person
+  #       include ValueObject
+  #
   #       values do
   #         attribute :name, String
   #         attribute :age, Integer
@@ -63,16 +65,47 @@ module CardGame
         "#{key}=#{send(key).inspect}"
       }.join(" ")
 
-      "<#{self.class.name} #{keyvalues}>"
+      "<#{name} #{keyvalues}>"
     end
 
-    alias_method :to_s, :inspect
+    def inspect
+      to_s
+    end
 
     # @private
     def equality_key
       self.class.attributes.map {|key, _|
         send(key)
       }
+    end
+
+    def copy(change = {})
+      self.class.new(to_h.merge!(change))
+    end
+
+    def to_h
+      self.class.attributes.map {|key, _|
+        [key, send(key)]
+      }.to_h
+    end
+
+    def name
+      self.class.name
+    end
+
+    def pretty_print(printer)
+      printer.group(1, "<#{name} ", ">") do
+        printer.seplist(to_h, nil, :each_pair) do |k, v|
+          printer.group {
+            printer.text k
+            printer.text '='
+            printer.group {
+              printer.breakable ''
+              printer.pp v
+            }
+          }
+        end
+      end
     end
 
     # Class methods that will be added when +ValueObject+ is included. Do not
